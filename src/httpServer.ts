@@ -43,12 +43,11 @@ export const buildApp = (opts: HttpServerOptions) => {
     bodyLimit: 64 * 1024 * 1024, // 64 MB
     logger: {
       level: process.env.LOG_LEVEL ?? "info",
-      // NOTE: the agent.* event lines emitted from claudeCodeRunner.ts
-      // (consumed by agent-host-monitor's PinoJsonParser per plan-002) pass
+      // NOTE: the agent.* event lines emitted from claudeCodeRunner.ts pass
       // tool inputs / outputs through preview(), which truncates AND scrubs
       // known secret patterns (api keys, bearer tokens) before logging.
       // Therefore we do NOT list inputPreview / preview / usagePreview here
-      // (redacting them would defeat the parser); secret hygiene is handled
+      // (redacting them would mask the agent telemetry); secret hygiene is handled
       // upstream of Pino in the preview() helper.
       redact: ["req.headers.authorization"],
     },

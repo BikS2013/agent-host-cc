@@ -8,7 +8,7 @@ deprecations_initial: 0
 deprecations_final: 0
 vulnerabilities_initial: 1
 vulnerabilities_final: 0
-target_path: /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui
+target_path: chat-ui
 validated_at: 2026-05-10T19:07:01Z
 last_validated_commit: null
 ---

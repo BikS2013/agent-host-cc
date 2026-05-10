@@ -2,11 +2,11 @@
 
 > **Status:** Authoritative configuration reference for operators of the `agent-host-cc` service.
 > **Companion documents:**
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-design.md` (architecture and runtime semantics)
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-functions.md` (functional and non-functional requirements)
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/how-to/deploy-locally.md` (build + run runbook)
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/how-to/connect-openai-client.md` (client wiring)
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/.env.example` (the canonical template)
+> - `docs/design/project-design.md` (architecture and runtime semantics)
+> - `docs/design/project-functions.md` (functional and non-functional requirements)
+> - `docs/how-to/deploy-locally.md` (build + run runbook)
+> - `docs/how-to/connect-openai-client.md` (client wiring)
+> - `.env.example` (the canonical template)
 
 This document enumerates every configuration variable the service reads, where it MUST be set, what each value means, and how missing or expired values behave at startup.
 
@@ -102,7 +102,7 @@ Selected when `CLAUDE_CODE_USE_FOUNDRY="1"`. All three variables in this group M
 - **Purpose.** Azure AI Foundry resource name. The SDK builds the endpoint URL from this value (F-13).
 - **How to obtain.** Azure Portal → AI Foundry → resource overview.
 - **Recommended storage.** Container env (`-e`); not secret.
-- **Options.** Resource name string, e.g. `biksaiservice-east-us-2`.
+- **Options.** Resource name string, e.g. `<your-foundry-resource>`.
 - **Default.** None — required when `CLAUDE_CODE_USE_FOUNDRY="1"`.
 
 ### 4.4 `ANTHROPIC_FOUNDRY_API_KEY_EXPIRES_AT`
@@ -306,7 +306,7 @@ This table is the single source of truth for "is this variable required, and wha
 | `ANTHROPIC_API_KEY` | When `CLAUDE_CODE_USE_FOUNDRY != "1"` | `ConfigurationError("ANTHROPIC_API_KEY")` → exit 78 | `sk-ant-api03-…` |
 | `ANTHROPIC_API_KEY_EXPIRES_AT` | Optional | (none) | `2026-12-31` |
 | `ANTHROPIC_FOUNDRY_API_KEY` | When `CLAUDE_CODE_USE_FOUNDRY = "1"` | `ConfigurationError("ANTHROPIC_FOUNDRY_API_KEY")` → exit 78 | `<paste-foundry-key>` |
-| `ANTHROPIC_FOUNDRY_RESOURCE` | When `CLAUDE_CODE_USE_FOUNDRY = "1"` | `ConfigurationError("ANTHROPIC_FOUNDRY_RESOURCE")` → exit 78 | `biksaiservice-east-us-2` |
+| `ANTHROPIC_FOUNDRY_RESOURCE` | When `CLAUDE_CODE_USE_FOUNDRY = "1"` | `ConfigurationError("ANTHROPIC_FOUNDRY_RESOURCE")` → exit 78 | `<your-foundry-resource>` |
 | `ANTHROPIC_FOUNDRY_API_KEY_EXPIRES_AT` | Optional | (none) | `2026-12-31` |
 | `FILES_API_BASE_URL` | Optional — only required if `files[]` extensions are used. Must be set together with `FILES_API_KEY`. | `ConfigurationError("FILES_API_BASE_URL")` if `FILES_API_KEY` is set without it → exit 78 | `http://192.168.65.1:3080` |
 | `FILES_API_KEY` | Optional — only required if `files[]` extensions are used. Must be set together with `FILES_API_BASE_URL`. | `ConfigurationError("FILES_API_KEY")` if `FILES_API_BASE_URL` is set without it → exit 78 | `<paste-token-here>` |
@@ -343,9 +343,9 @@ This table is the single source of truth for "is this variable required, and wha
 
 ## 13. Cross-references
 
-- Functional requirements: `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-functions.md` (F-13, F-16, F-17, NF-3, NF-5, NF-6 are most relevant to this guide).
-- Architecture and runtime semantics: `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-design.md` §6 (Configuration model).
-- `.env.example` template: `/Users/giorgosmarinos/aiwork/agent-host-cc/.env.example`.
-- Local deploy runbook: `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/how-to/deploy-locally.md`.
-- Client wiring: `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/how-to/connect-openai-client.md`.
-- Project memory exception list: `/Users/giorgosmarinos/aiwork/agent-host-cc/CLAUDE.md` → "Configuration Fallback Exceptions".
+- Functional requirements: `docs/design/project-functions.md` (F-13, F-16, F-17, NF-3, NF-5, NF-6 are most relevant to this guide).
+- Architecture and runtime semantics: `docs/design/project-design.md` §6 (Configuration model).
+- `.env.example` template: `.env.example`.
+- Local deploy runbook: `docs/how-to/deploy-locally.md`.
+- Client wiring: `docs/how-to/connect-openai-client.md`.
+- Project memory exception list: `CLAUDE.md` → "Configuration Fallback Exceptions".

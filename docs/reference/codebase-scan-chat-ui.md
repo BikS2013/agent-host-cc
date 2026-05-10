@@ -216,7 +216,7 @@ The following are required by the chat-ui but do not exist in the repo today:
 
 | Item | Recommended landing location |
 |---|---|
-| `chat-ui/` subfolder (new sub-application) | `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/` — do NOT modify root `package.json` |
+| `chat-ui/` subfolder (new sub-application) | `chat-ui/` — do NOT modify root `package.json` |
 | Profile Zod schemas (3 backend kinds) | `chat-ui/src/profiles/schemas.ts` |
 | URL + headers builder per backend kind | `chat-ui/src/profiles/requestBuilder.ts` |
 | SSE parser for `chat.completion.chunk` | `chat-ui/src/sse/parser.ts` |

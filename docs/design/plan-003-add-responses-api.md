@@ -5,9 +5,9 @@
 > **Depends on:** plan-001-extract-and-rebrand.md (must be complete)
 > **Parallelizable with:** plan-002-decouple-from-foundry.md (independent)
 > **Source of truth:**
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/refined-request.md` § F-20, F-21, AC-17, AC-18, AC-19, AC-20, CONFIRMED-2
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/investigation-extraction-approach.md` § Focus Area 2 (Option 2A) and Focus Area 4 (Option 4A)
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/codebase-scan-source-agent-host.md` § 6, § 9 (F-20 / F-21 rows)
+> - `docs/design/refined-request.md` § F-20, F-21, AC-17, AC-18, AC-19, AC-20, CONFIRMED-2
+> - `docs/reference/investigation-extraction-approach.md` § Focus Area 2 (Option 2A) and Focus Area 4 (Option 4A)
+> - `docs/reference/codebase-scan-source-agent-host.md` § 6, § 9 (F-20 / F-21 rows)
 
 ## Objective
 
@@ -26,26 +26,26 @@ Implement a working `POST /v1/responses` endpoint emitting the canonical OpenAI 
 
 > **Investigation reference:** Focus Area 1 + refined-request "Source file rename revised" §3.
 
-- [ ] 1.1 Rename `/Users/giorgosmarinos/aiwork/agent-host-cc/src/openAiResponseAdapter.ts` → `/Users/giorgosmarinos/aiwork/agent-host-cc/src/openAiChatSseAdapter.ts`. Keep the file's contents identical (it actually emits Chat Completions SSE chunks).
+- [ ] 1.1 Rename `src/openAiResponseAdapter.ts` → `src/openAiChatSseAdapter.ts`. Keep the file's contents identical (it actually emits Chat Completions SSE chunks).
 - [ ] 1.2 Update imports:
-  - `/Users/giorgosmarinos/aiwork/agent-host-cc/src/httpServer.ts` — change `from "./openAiResponseAdapter.js"` to `from "./openAiChatSseAdapter.js"`.
-  - Any test that imports the adapter — likely `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/openAiResponseAdapter.test.ts`. Rename that file as well → `openAiChatSseAdapter.test.ts` and update the import path inside it.
+  - `src/httpServer.ts` — change `from "./openAiResponseAdapter.js"` to `from "./openAiChatSseAdapter.js"`.
+  - Any test that imports the adapter — likely `test/unit/openAiResponseAdapter.test.ts`. Rename that file as well → `openAiChatSseAdapter.test.ts` and update the import path inside it.
 - [ ] 1.3 Verification: `grep -RIn 'openAiResponseAdapter' src test` should produce zero hits at this point. The name is now free for Phase 2.
 
 ### Files modified / renamed in Phase 1
 Renamed:
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/openAiResponseAdapter.ts` → `openAiChatSseAdapter.ts`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/openAiResponseAdapter.test.ts` → `openAiChatSseAdapter.test.ts`
+- `src/openAiResponseAdapter.ts` → `openAiChatSseAdapter.ts`
+- `test/unit/openAiResponseAdapter.test.ts` → `openAiChatSseAdapter.test.ts`
 
 Modified:
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/httpServer.ts`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/openAiChatSseAdapter.test.ts`
+- `src/httpServer.ts`
+- `test/unit/openAiChatSseAdapter.test.ts`
 
 ## Phase 2 — New `openAiResponseAdapter.ts` emitting Responses events
 
 > **Investigation reference:** Focus Area 2, Option 2A. Full canonical envelope with `output_item.added` → `content_part.added` → `output_text.delta…` → `output_text.done` → `content_part.done` → `output_item.done` → `completed`.
 
-- [ ] 2.1 Create `/Users/giorgosmarinos/aiwork/agent-host-cc/src/openAiResponseAdapter.ts` exporting:
+- [ ] 2.1 Create `src/openAiResponseAdapter.ts` exporting:
   ```ts
   export type ResponsesHeader = { id: string; model: string; created: number };
   export async function* adaptToOpenAiResponses(
@@ -90,13 +90,13 @@ Modified:
 - [ ] 3.3 Add the new env var to `Config`, `loadConfig`, and `test/unit/config.test.ts` (default + future-reserved error case).
 
 ### Files modified in Phase 3
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/config.ts`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/openAiResponseAdapter.ts`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/config.test.ts`
+- `src/config.ts`
+- `src/openAiResponseAdapter.ts`
+- `test/unit/config.test.ts`
 
 ## Phase 4 — Zod request schema for `/v1/responses`
 
-- [ ] 4.1 In `/Users/giorgosmarinos/aiwork/agent-host-cc/src/types.ts`, add `ResponsesRequestSchema` accepting:
+- [ ] 4.1 In `src/types.ts`, add `ResponsesRequestSchema` accepting:
   - `model: string` (required)
   - `input: string | InputMessage[]` where `InputMessage` is a discriminated union of:
     - `{ role: "user" | "assistant" | "system", content: InputContentPart[] }`
@@ -109,17 +109,17 @@ Modified:
   - `files?: FileRef[]` (reuse the same `FileRef` from the Chat schema)
 - [ ] 4.2 Export both the schema and the inferred TS type `ResponsesRequest`.
 - [ ] 4.3 Validate that the `input_image.image_url` shape (string OR `{url: string}`) is normalized inside the route handler before passing to the attachment processor — translate to the same internal shape the Chat adapter uses (`{ type: "image_url", image_url: { url } }`) so the existing `attachmentProcessor.ts` requires zero changes.
-- [ ] 4.4 Add unit tests in `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/types.test.ts` for: minimal-string-input, message-array-input, mixed text+input_image, missing-model rejected, invalid-image-url-shape rejected.
+- [ ] 4.4 Add unit tests in `test/unit/types.test.ts` for: minimal-string-input, message-array-input, mixed text+input_image, missing-model rejected, invalid-image-url-shape rejected.
 
 ### Files modified in Phase 4
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/types.ts`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/types.test.ts`
+- `src/types.ts`
+- `test/unit/types.test.ts`
 
 ## Phase 5 — Mount `POST /v1/responses` in `httpServer.ts`
 
 > **Investigation reference:** Focus Area 2 ("Runner reuse") + F-21.
 
-- [ ] 5.1 In `/Users/giorgosmarinos/aiwork/agent-host-cc/src/httpServer.ts`, register a new route `POST /v1/responses`:
+- [ ] 5.1 In `src/httpServer.ts`, register a new route `POST /v1/responses`:
   - Apply the same `requireAuth(req, reply)` guard used by `/v1/chat/completions`.
   - Parse with `ResponsesRequestSchema.safeParse(req.body)`. On failure → `InvalidRequestError` (422).
   - Strip `cfg.modelPrefix` from `model`. On unknown model → `ModelNotFoundError` (404).
@@ -134,30 +134,30 @@ Modified:
 - [ ] 5.4 Update the integration test scaffolding (`test/integration/_helpers.ts` from plan-002 if present; otherwise inline) so the same Fastify-inject helper covers both routes.
 
 ### Files modified in Phase 5
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/httpServer.ts`
+- `src/httpServer.ts`
 
 ## Phase 6 — Tests
 
-- [ ] 6.1 Create `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/openAiResponseAdapter.test.ts` (NEW file — distinct from the renamed Chat adapter test). Cover:
+- [ ] 6.1 Create `test/unit/openAiResponseAdapter.test.ts` (NEW file — distinct from the renamed Chat adapter test). Cover:
   - [ ] 6.1.a **Sequence ordering** — feed a synthetic SDK iterator yielding two text deltas and assert events arrive in this order: `response.created`, `response.in_progress`, `response.output_item.added`, `response.content_part.added`, `response.output_text.delta` ×2, `response.output_text.done`, `response.content_part.done`, `response.output_item.done`, `response.completed`, `[DONE]`.
   - [ ] 6.1.b **Sequence numbers monotonic** — extract `sequence_number` from each event, assert strictly increasing.
   - [ ] 6.1.c **Tool-use shim** — feed an SDK iterator with one text + one tool_use + one text; assert all three render as `output_text.delta` events on the same `(item_id, content_index)` and the tool_use delta contains `*[<tool>: …]*`.
   - [ ] 6.1.d **Error path** — feed an iterator that throws mid-stream; assert a `response.failed` (or chosen error event) precedes `[DONE]`.
   - [ ] 6.1.e **Aggregator** — `aggregateResponses` returns a `Response` JSON object with `id`, `object:"response"`, `status:"completed"`, `model`, `output[0].content[0].text` equal to concatenated deltas.
-- [ ] 6.2 Create `/Users/giorgosmarinos/aiwork/agent-host-cc/test/integration/agentHost.responses.integration.test.ts` mirroring the existing Chat integration test:
+- [ ] 6.2 Create `test/integration/agentHost.responses.integration.test.ts` mirroring the existing Chat integration test:
   - [ ] 6.2.a **AC-17** streaming smoke — `POST /v1/responses` with `input: "say hi"` and `stream:true`; assert `Content-Type: text/event-stream`, ends with `data: [DONE]\n\n`, aggregated output_text non-empty.
   - [ ] 6.2.b **AC-18** non-streaming — same body with `stream:false`; assert JSON shape `{id, object:"response", model, output, usage}`.
   - [ ] 6.2.c **AC-19** attachment parity — `input_image` with a `data:image/png;base64,…` URL; assert the file lands in `<workspace>/<chatId>/`, the SDK was called with an inline image block (verified via mock), and the manifest line is appended.
   - [ ] 6.2.d Reuse the renamed Chat integration test as the original Chat path; the helper module bridges both.
-- [ ] 6.3 Create `/Users/giorgosmarinos/aiwork/agent-host-cc/test_scripts/smoke-responses-sdk.ts`:
+- [ ] 6.3 Create `test_scripts/smoke-responses-sdk.ts`:
   - Uses the official `openai` Node SDK (already in devDependencies; otherwise add `openai` as a `devDependency`).
   - Calls `const stream = await client.responses.create({ model, input:"hello", stream:true })` and `for await (const event of stream)` to consume.
   - This is **AC-20** evidence.
 
 ### Files created in Phase 6
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/openAiResponseAdapter.test.ts`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/integration/agentHost.responses.integration.test.ts`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test_scripts/smoke-responses-sdk.ts`
+- `test/unit/openAiResponseAdapter.test.ts`
+- `test/integration/agentHost.responses.integration.test.ts`
+- `test_scripts/smoke-responses-sdk.ts`
 
 ## Phase 7 — Documentation
 
@@ -170,7 +170,7 @@ Modified:
 ## Verification checklist (Claude-executable)
 
 ```bash
-cd /Users/giorgosmarinos/aiwork/agent-host-cc
+cd <repo-root>
 
 # Type-check + tests
 npm run build

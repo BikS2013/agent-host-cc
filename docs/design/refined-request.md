@@ -36,12 +36,12 @@ The following decisions were confirmed by the user via `AskUserQuestion` after t
 Development (greenfield project produced by extracting and re-platforming an existing service)
 
 ## Objective
-Produce a self-contained, standalone TypeScript project at `/Users/giorgosmarinos/aiwork/agent-host-cc/` that packages the Anthropic Claude Code agent inside a container and exposes it through an OpenAI-compatible HTTP interface. The new project must extract every piece of code, configuration, and operational know-how it needs from the source `agent-host` service in `/Users/giorgosmarinos/aiwork/open-webui-phase1/agent-host/` (and surrounding documentation under `/Users/giorgosmarinos/aiwork/open-webui-phase1/docs/`), and must continue to operate without any reference, build dependency, runtime dependency, or path linkage back to the `open-webui-phase1` repository. The result must be deployable as a Docker (or compatible OCI) container that any OpenAI-compatible client (Open WebUI, custom UIs, scripts using the OpenAI SDK, evaluation harnesses) can talk to.
+Produce a self-contained, standalone TypeScript project at `` that packages the Anthropic Claude Code agent inside a container and exposes it through an OpenAI-compatible HTTP interface. The new project must extract every piece of code, configuration, and operational know-how it needs from the source `agent-host` service in `<source-repo>/agent-host/` (and surrounding documentation under `<source-repo>/docs/`), and must continue to operate without any reference, build dependency, runtime dependency, or path linkage back to the `open-webui-phase1` repository. The result must be deployable as a Docker (or compatible OCI) container that any OpenAI-compatible client (Open WebUI, custom UIs, scripts using the OpenAI SDK, evaluation harnesses) can talk to.
 
 ## Scope
 
 ### In scope
-- Extract the existing TypeScript service from `/Users/giorgosmarinos/aiwork/open-webui-phase1/agent-host/` (sources under `src/`, tests under `test/`, `package.json`, `tsconfig.json`, `vitest.config.ts`, `Dockerfile`, `.dockerignore` if present) into the new project.
+- Extract the existing TypeScript service from `<source-repo>/agent-host/` (sources under `src/`, tests under `test/`, `package.json`, `tsconfig.json`, `vitest.config.ts`, `Dockerfile`, `.dockerignore` if present) into the new project.
 - Preserve and re-document the modules that make the service work: `httpServer`, `attachmentProcessor` (with sub-modules `dataUrlDecoder`, `ssrfGuard`, `remoteUrlFetcher`, `filesApiFetcher`, `urlDetector`), `workspaceManager`, `agentRunner` interface, `claudeCodeRunner`, `openAiResponseAdapter` (note: actually emits Chat Completions SSE chunks despite the filename), `config`, `errors`, `types`, `index`.
 - Preserve the OpenAI Chat Completions surface: `POST /v1/chat/completions` (streaming SSE and non-streaming aggregate), `GET /v1/models`, `GET /healthz`, `GET /files/:chatId/*path` (workspace artifact serving with bearer-token auth and traversal protection).
 - Preserve the attachment processing pipeline end-to-end:
@@ -59,7 +59,7 @@ Produce a self-contained, standalone TypeScript project at `/Users/giorgosmarino
 - A `Dockerfile` that produces an image runnable on Docker Desktop, Apple `container`, or any OCI-compliant runtime, using a non-root user.
 - A `docker-compose.yml` (or equivalent) reference for local single-container deployment, including a sample `.env.example`.
 - A test suite covering unit (`vitest`) and integration tests, ported and adapted from the source project's `test/` tree, with all references to "Open WebUI", "Foundry-only", "phase1" abstracted to neutral, configurable equivalents.
-- A complete documentation set under `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/`:
+- A complete documentation set under `docs/`:
   - `docs/design/project-design.md` — architecture, components, data flow.
   - `docs/design/project-functions.md` — functional requirements register.
   - `docs/design/configuration-guide.md` — every config variable, source priority, storage recommendations, expiry handling.
@@ -128,7 +128,7 @@ Produce a self-contained, standalone TypeScript project at `/Users/giorgosmarino
 
 ### Non-functional
 
-20. **NF-1 Self-containment.** The new project MUST NOT import, reference, copy at runtime, or rely on any path inside `/Users/giorgosmarinos/aiwork/open-webui-phase1/`. A grep for `open-webui-phase1`, `phase1`, `claude-bridge`, `claude-skills`, `claude-artifact-server`, `cc-monitor`, or `pipelines` in the new project's source, configs, and docs MUST yield only intentional historical references in `docs/reference/` (clearly marked as historical context).
+20. **NF-1 Self-containment.** The new project MUST NOT import, reference, copy at runtime, or rely on any path inside `<source-repo>/`. A grep for `open-webui-phase1`, `phase1`, `claude-bridge`, `claude-skills`, `claude-artifact-server`, `cc-monitor`, or `pipelines` in the new project's source, configs, and docs MUST yield only intentional historical references in `docs/reference/` (clearly marked as historical context).
 
 21. **NF-2 Conformance to project conventions.** All TypeScript, ESM, Node ≥ 22, Fastify, Zod, Pino, Undici, vitest. Test scripts (acceptance, smoke) live under `/test_scripts/`. Plans live under `/docs/design/plan-xxx-*.md`. Functional requirements are registered in `/docs/design/project-functions.md`. The complete design lives in `/docs/design/project-design.md`. Issue tracker at `/Issues - Pending Items.md`.
 
@@ -170,7 +170,7 @@ The parent task asked for several clarifications via `AskUserQuestion`, which is
 
 Each criterion is independently testable. "Pass" means demonstrated against the built image running on the local host.
 
-- **AC-1 Self-contained build.** Running `npm ci && npm run build` inside `/Users/giorgosmarinos/aiwork/agent-host-cc/` succeeds with **zero references** to `/Users/giorgosmarinos/aiwork/open-webui-phase1/` in the resolved module graph (`npm ls` and a path-grep on the resulting `dist/` produce nothing pointing at the source repo). The project tree must build successfully even after the source repo is renamed or removed.
+- **AC-1 Self-contained build.** Running `npm ci && npm run build` inside `` succeeds with **zero references** to `<source-repo>/` in the resolved module graph (`npm ls` and a path-grep on the resulting `dist/` produce nothing pointing at the source repo). The project tree must build successfully even after the source repo is renamed or removed.
 
 - **AC-2 Test parity.** `npm test` runs the full ported unit + integration suite green. The number of test files is greater than or equal to the source's `test/unit/` count plus `test/integration/` count. `mockFoundry`/`mockOpenWebUI` are replaced with provider-neutral mocks.
 
@@ -213,7 +213,7 @@ Each criterion is independently testable. "Pass" means demonstrated against the 
 - **A-4 Files API backend.** Most consumers will set the backend to point at Open WebUI's `/api/v1/files/<id>/content`, but the configuration variables are named generically (`FILES_API_BASE_URL`, `FILES_API_KEY`, `FILES_API_PATH_TEMPLATE` with default `/api/v1/files/{id}/content`). Backends that don't follow this template can override the template.
 - **A-5 Single container.** The deployment unit is one container. Horizontal scaling and shared workspace storage are out of scope for v1 (per-chat directories on a local volume).
 - **A-6 No auth on `/healthz`.** Container orchestrators rely on this; the source project already follows this convention.
-- **A-7 The source project remains read-only.** Extraction is a one-time copy + adapt; the source agent-host code under `/Users/giorgosmarinos/aiwork/open-webui-phase1/agent-host/` is not modified during this work.
+- **A-7 The source project remains read-only.** Extraction is a one-time copy + adapt; the source agent-host code under `<source-repo>/agent-host/` is not modified during this work.
 - **A-8 Git history is not preserved.** The source files are copied flat. If history preservation is later requested, it will be done as a separate task.
 
 ## Open Questions
@@ -248,19 +248,19 @@ This is the high-level migration sequence the implementation phase will follow. 
 ## Original Request
 
 ```
-I want you to examine the code inside the `../Open-WebUI-phase1` project (absolute path: `/Users/giorgosmarinos/aiwork/open-webui-phase1`).
+I want you to examine the code inside the `../Open-WebUI-phase1` project (absolute path: `<source-repo>`).
 
-Inside that project there is a folder named `agent-host/` (absolute path: `/Users/giorgosmarinos/aiwork/open-webui-phase1/agent-host`) which contains an implementation that aims to be used as the harness needed to package the claude-code capabilities inside a container and expose them through an OpenAI-compatible HTTP interface.
+Inside that project there is a folder named `agent-host/` (absolute path: `<source-repo>/agent-host`) which contains an implementation that aims to be used as the harness needed to package the claude-code capabilities inside a container and expose them through an OpenAI-compatible HTTP interface.
 
 I want you to:
 1. Get any source code needed for this purpose from the `open-webui-phase1` project — focusing on the `agent-host/` folder but pulling in any other code or assets it depends on (config, scripts, Dockerfile, attachment processors, etc.).
-2. Build a dedicated, clear, standalone solution at `/Users/giorgosmarinos/aiwork/agent-host-cc/` that allows me to deploy Claude-Code containers which are accessible through an OpenAI-compatible interface. The solution must NOT depend on the open-webui-phase1 repository — it must stand on its own.
-3. Collect any documents needed from `../open-webui-phase1/docs/` (design docs, plans, configuration guides, how-tos) and use them to create clear, concise, and precise documentation under `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/` describing how the solution has been designed, how it has been implemented, and how users must use it.
+2. Build a dedicated, clear, standalone solution at `` that allows me to deploy Claude-Code containers which are accessible through an OpenAI-compatible interface. The solution must NOT depend on the open-webui-phase1 repository — it must stand on its own.
+3. Collect any documents needed from `../open-webui-phase1/docs/` (design docs, plans, configuration guides, how-tos) and use them to create clear, concise, and precise documentation under `docs/` describing how the solution has been designed, how it has been implemented, and how users must use it.
 
 Source project context (already explored):
-- Source agent-host code: `/Users/giorgosmarinos/aiwork/open-webui-phase1/agent-host/` — TypeScript, has `src/` with httpServer.ts, openAiResponseAdapter.ts, claudeCodeRunner.ts, agentRunner.ts, attachmentProcessor.ts (+ submodules), workspaceManager.ts, config.ts, types.ts, errors.ts, index.ts; plus Dockerfile, package.json, tsconfig.json, vitest.config.ts, test/.
-- Source docs: `/Users/giorgosmarinos/aiwork/open-webui-phase1/docs/design/` contains `plan-002-typescript-agent-host.md`, `plan-003-agent-host-implementation.md`, `configuration-guide.md`, `project-design.md`, `project-functions.md`. `docs/how-to/connect-claude-skills-to-open-webui.md` is also relevant.
-- Target project: `/Users/giorgosmarinos/aiwork/agent-host-cc/` — currently has only `CLAUDE.md` and empty `docs/{design,reference,research}/` and `test_scripts/` directories. Will host the standalone solution.
+- Source agent-host code: `<source-repo>/agent-host/` — TypeScript, has `src/` with httpServer.ts, openAiResponseAdapter.ts, claudeCodeRunner.ts, agentRunner.ts, attachmentProcessor.ts (+ submodules), workspaceManager.ts, config.ts, types.ts, errors.ts, index.ts; plus Dockerfile, package.json, tsconfig.json, vitest.config.ts, test/.
+- Source docs: `<source-repo>/docs/design/` contains `plan-002-typescript-agent-host.md`, `plan-003-agent-host-implementation.md`, `configuration-guide.md`, `project-design.md`, `project-functions.md`. `docs/how-to/connect-claude-skills-to-open-webui.md` is also relevant.
+- Target project: `` — currently has only `CLAUDE.md` and empty `docs/{design,reference,research}/` and `test_scripts/` directories. Will host the standalone solution.
 
 The new project will be named `agent-host-cc` (Claude-Code-only Agent Host).
 ```

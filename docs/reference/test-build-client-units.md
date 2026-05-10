@@ -7,12 +7,12 @@ language: typescript
 framework: vitest
 test_command_full: "cd chat-ui && npx vitest run"
 test_command_scope: "cd chat-ui && npx vitest run test/client/sseClient.test.ts test/client/api.test.ts test/client/state.test.ts"
-test_dir: /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/client
-target_path: /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui
+test_dir: chat-ui/test/client
+target_path: chat-ui
 test_files_owned:
-  - /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/client/sseClient.test.ts
-  - /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/client/api.test.ts
-  - /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/client/state.test.ts
+  - chat-ui/test/client/sseClient.test.ts
+  - chat-ui/test/client/api.test.ts
+  - chat-ui/test/client/state.test.ts
 tests_added: 54
 tests_updated: 0
 tests_run: 54
@@ -113,16 +113,16 @@ No prior test files existed for any of the in-scope symbols. `test/client/` dire
 
 | File | Reason |
 |---|---|
-| `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/client/sseClient.test.ts` | new |
-| `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/client/api.test.ts` | new |
-| `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/client/state.test.ts` | new |
+| `chat-ui/test/client/sseClient.test.ts` | new |
+| `chat-ui/test/client/api.test.ts` | new |
+| `chat-ui/test/client/state.test.ts` | new |
 
 ## 6. Test Run Results
 
 All 54 tests passed. Run log summary:
 
 ```
- RUN  v4.1.5 /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui
+ RUN  v4.1.5 chat-ui
 
  Test Files  3 passed (3)
       Tests  54 passed (54)
@@ -158,11 +158,11 @@ The `resetState()` helper defined inside `state.test.ts` directly mutates module
 
 | # | Command | Exit code |
 |---|---|---|
-| 1 | `cd /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui && npx vitest run test/client/sseClient.test.ts` | 1 (jsdom missing) |
-| 2 | `cd /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui && npm install --save-dev jsdom` | 0 |
-| 3 | `cd /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui && npx vitest run test/client/sseClient.test.ts` | 0 (11 passed) |
-| 4 | `cd /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui && npx vitest run test/client/api.test.ts` | 1 (5 test-bug failures — double Response.body consumption) |
-| 5 | `cd /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui && npx vitest run test/client/api.test.ts` | 0 (14 passed, after fixing mockImplementation) |
-| 6 | `cd /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui && npx vitest run test/client/state.test.ts` | 1 (parse error — await inside non-async it body) |
-| 7 | `cd /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui && npx vitest run test/client/state.test.ts` | 0 (29 passed, after removing dynamic imports) |
-| 8 | `cd /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui && npx vitest run test/client/sseClient.test.ts test/client/api.test.ts test/client/state.test.ts` | 0 (54 passed) |
+| 1 | `cd chat-ui && npx vitest run test/client/sseClient.test.ts` | 1 (jsdom missing) |
+| 2 | `cd chat-ui && npm install --save-dev jsdom` | 0 |
+| 3 | `cd chat-ui && npx vitest run test/client/sseClient.test.ts` | 0 (11 passed) |
+| 4 | `cd chat-ui && npx vitest run test/client/api.test.ts` | 1 (5 test-bug failures — double Response.body consumption) |
+| 5 | `cd chat-ui && npx vitest run test/client/api.test.ts` | 0 (14 passed, after fixing mockImplementation) |
+| 6 | `cd chat-ui && npx vitest run test/client/state.test.ts` | 1 (parse error — await inside non-async it body) |
+| 7 | `cd chat-ui && npx vitest run test/client/state.test.ts` | 0 (29 passed, after removing dynamic imports) |
+| 8 | `cd chat-ui && npx vitest run test/client/sseClient.test.ts test/client/api.test.ts test/client/state.test.ts` | 0 (54 passed) |

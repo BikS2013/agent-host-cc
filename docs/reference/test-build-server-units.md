@@ -6,13 +6,13 @@ language: typescript
 framework: vitest
 test_command_full: cd chat-ui && npx vitest run
 test_command_scope: cd chat-ui && npx vitest run test/unit/profileSchema.test.ts test/unit/requestBuilder.test.ts test/unit/profileStore.test.ts test/unit/config.test.ts
-test_dir: /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit
-target_path: /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui
+test_dir: chat-ui/test/unit
+target_path: chat-ui
 test_files_owned:
-  - /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/profileSchema.test.ts
-  - /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/requestBuilder.test.ts
-  - /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/profileStore.test.ts
-  - /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/config.test.ts
+  - chat-ui/test/unit/profileSchema.test.ts
+  - chat-ui/test/unit/requestBuilder.test.ts
+  - chat-ui/test/unit/profileStore.test.ts
+  - chat-ui/test/unit/config.test.ts
 tests_added: 148
 tests_updated: 0
 tests_run: 148
@@ -98,13 +98,13 @@ All tests are in the `unit` category (pure function logic and deterministic I/O 
 
 | File | Reason |
 |---|---|
-| `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/profileSchema.test.ts` | new |
-| `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/requestBuilder.test.ts` | new |
-| `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/profileStore.test.ts` | new |
-| `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/config.test.ts` | new |
+| `chat-ui/test/unit/profileSchema.test.ts` | new |
+| `chat-ui/test/unit/requestBuilder.test.ts` | new |
+| `chat-ui/test/unit/profileStore.test.ts` | new |
+| `chat-ui/test/unit/config.test.ts` | new |
 
 Additionally created (not a test file, but required for test execution):
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/vitest.config.ts` — minimal config (`environment: "node"`, `include: ["test/**/*.test.ts"]`). Created only because no vitest config existed anywhere (neither as a standalone file nor as a block inside `package.json`).
+- `chat-ui/vitest.config.ts` — minimal config (`environment: "node"`, `include: ["test/**/*.test.ts"]`). Created only because no vitest config existed anywhere (neither as a standalone file nor as a block inside `package.json`).
 
 ## 6. Test Run Results
 
@@ -142,8 +142,8 @@ The original plan called for `vi.spyOn(fs, "renameSync")` to simulate a mid-flig
 
 | Step | Command | Exit code |
 |---|---|---|
-| 1 | `cd /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui && npx vitest --version` | 0 |
-| 2 | `mkdir -p /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit` | 0 |
+| 1 | `cd chat-ui && npx vitest --version` | 0 |
+| 2 | `mkdir -p chat-ui/test/unit` | 0 |
 | 3 (write) | Created `vitest.config.ts` | — |
 | 4 (write) | Created `test/unit/profileSchema.test.ts` | — |
 | 5 (write) | Created `test/unit/requestBuilder.test.ts` | — |

@@ -1,7 +1,7 @@
 # How To — Connect an OpenAI-Compatible Client to `agent-host-cc`
 
 > **Audience:** Operators who have a running `agent-host-cc` container and want to point a UI, SDK, or script at it.
-> **Prerequisite:** A running container reachable on `http://localhost:8000` (or whatever host:port you mapped). See `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/how-to/deploy-locally.md` to get there.
+> **Prerequisite:** A running container reachable on `http://localhost:8000` (or whatever host:port you mapped). See `docs/how-to/deploy-locally.md` to get there.
 > **Endpoints exposed:** Both `POST /v1/chat/completions` and `POST /v1/responses` are first-class, equivalent surfaces. Pick whichever your client speaks.
 
 In every example below, `$TOKEN` is the value of `AGENT_HOST_API_KEY` from your `.env` file, and the base URL is `http://localhost:8000/v1`. The bearer token authorises every endpoint except `GET /healthz`.
@@ -322,6 +322,6 @@ Both endpoints share the same `MODEL_IDS`, the same `MODEL_PREFIX` stripping, th
 
 ## 7. Cross-references
 
-- Configuration: `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/configuration-guide.md`.
-- Local deployment: `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/how-to/deploy-locally.md`.
-- Wire-level architecture: `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-design.md` §5 (HTTP API contracts).
+- Configuration: `docs/design/configuration-guide.md`.
+- Local deployment: `docs/how-to/deploy-locally.md`.
+- Wire-level architecture: `docs/design/project-design.md` §5 (HTTP API contracts).

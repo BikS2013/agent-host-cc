@@ -1,8 +1,8 @@
 # Source Extraction Notes
 
-> **Purpose:** Historical record of what was extracted from the source `agent-host` service into `agent-host-cc`, what was renamed, and what was dropped. This document is the audit trail for plan-001 (`/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/plan-001-extract-and-rebrand.md`) and the codebase scan (`/Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/codebase-scan-source-agent-host.md`).
+> **Purpose:** Historical record of what was extracted from the source `agent-host` service into `agent-host-cc`, what was renamed, and what was dropped. This document is the audit trail for plan-001 (`docs/design/plan-001-extract-and-rebrand.md`) and the codebase scan (`docs/reference/codebase-scan-source-agent-host.md`).
 >
-> **Read-only source repository:** `/Users/giorgosmarinos/aiwork/open-webui-phase1/agent-host/`
+> **Read-only source repository:** `<source-repo>/agent-host/`
 > **Last extracted:** 2026-05-10.
 
 This is reference material only. Nothing in this document is consumed by the build, the runtime, or any test. It exists so a future maintainer can answer "where did file X come from, and why does it look the way it does?" without re-reading the source repository.
@@ -13,7 +13,7 @@ This is reference material only. Nothing in this document is consumed by the bui
 
 The following files were copied by plan-001 Phase A from the source `src/` and `test/` trees. Each file was then subjected to a Phase B/C/D/E sanitization pass that touched comments, error strings, env-var names, and the unused `@fastify/multipart` reference, but left the structural shape and line-by-line behaviour intact.
 
-### Source files (TypeScript, under `/Users/giorgosmarinos/aiwork/agent-host-cc/src/`)
+### Source files (TypeScript, under `src/`)
 
 | File | Origin | Rebrand notes |
 |---|---|---|
@@ -31,7 +31,7 @@ The following files were copied by plan-001 Phase A from the source `src/` and `
 | `attachmentProcessor/remoteUrlFetcher.ts` | `…/agent-host/src/attachmentProcessor/remoteUrlFetcher.ts` | None — copied verbatim. |
 | `attachmentProcessor/urlDetector.ts` | `…/agent-host/src/attachmentProcessor/urlDetector.ts` | None — copied verbatim. |
 
-### Test files (under `/Users/giorgosmarinos/aiwork/agent-host-cc/test/`)
+### Test files (under `test/`)
 
 | File | Origin | Rebrand notes |
 |---|---|---|
@@ -110,7 +110,7 @@ The following files were copied by plan-001 Phase A from the source `src/` and `
 
 | Concept | Reason for omission |
 |---|---|
-| `cc-monitor/` sibling service from the source repo | Out of scope for v1 (D-3, CONFIRMED-3). A historical pointer lives in `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/historical-context-cc-monitor.md`. No code, no dependency, no Docker target. |
+| `cc-monitor/` sibling service from the source repo | Out of scope for v1 (D-3, CONFIRMED-3). A historical pointer lives in `docs/reference/historical-context-cc-monitor.md`. No code, no dependency, no Docker target. |
 | The Open WebUI container | Not a component of this project — Open WebUI (or any other OpenAI-compatible client) is deployed separately by the operator. |
 | The Pipelines container | Same as Open WebUI. The source repo's plan-002 retired the Pipelines inlet filter; the new project does not carry it forward. |
 | Python `claude-skills` and `claude-artifact-server` containers | Already retired by the source's plan-002. Not migrated. |
@@ -121,4 +121,4 @@ The following files were copied by plan-001 Phase A from the source `src/` and `
 
 ## 4. Source self-reference
 
-Source repo (read-only reference): `/Users/giorgosmarinos/aiwork/open-webui-phase1/agent-host/` — last extracted 2026-05-10.
+Source repo (read-only reference): `<source-repo>/agent-host/` — last extracted 2026-05-10.

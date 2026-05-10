@@ -2,14 +2,14 @@
 
 ## Executive Summary
 
-The recommended path is a **flat copy-and-adapt extraction** of the source `agent-host/` tree from `/Users/giorgosmarinos/aiwork/open-webui-phase1/agent-host/` into the new standalone project, combined with a **targeted refactor pass** that (a) decouples the runner from Foundry via env-driven provider selection, (b) reclaims the misnamed `openAiResponseAdapter.ts` filename for the actual OpenAI Responses API, and (c) introduces a fresh `openAiChatSseAdapter.ts` for the existing Chat Completions logic. For the new `/v1/responses` surface, the recommendation is to emit the **canonical Responses event sequence with full `output_item` / `content_part` envelope events** (not just `output_text.delta`), because the official `openai-node` SDK's `responses.stream()` consumer relies on `response.output_item.added` arriving before any text delta — a constraint already proven to break clients like Codex when omitted (see References row 3). Tool-use blocks should still surface as italic markdown inside `output_text.delta` (low-risk compatibility shim), with a documented upgrade path to native `function_call` items. The Claude Agent SDK still respects `CLAUDE_CODE_USE_FOUNDRY=1` + `ANTHROPIC_FOUNDRY_RESOURCE` + optional `ANTHROPIC_FOUNDRY_API_KEY`; the only behavioural risk in the v0.2.x line is the v0.2.113 revert that made `options.env` *replace* (not overlay) `process.env` — meaning the new runner must spread `process.env` explicitly when injecting provider env. Vitest stays. Apple `container` is treated as a Docker drop-in for v1, with a `pathToClaudeCodeExecutable` override retained as defensive insurance against virtiofs path-resolution flakiness.
+The recommended path is a **flat copy-and-adapt extraction** of the source `agent-host/` tree from `<source-repo>/agent-host/` into the new standalone project, combined with a **targeted refactor pass** that (a) decouples the runner from Foundry via env-driven provider selection, (b) reclaims the misnamed `openAiResponseAdapter.ts` filename for the actual OpenAI Responses API, and (c) introduces a fresh `openAiChatSseAdapter.ts` for the existing Chat Completions logic. For the new `/v1/responses` surface, the recommendation is to emit the **canonical Responses event sequence with full `output_item` / `content_part` envelope events** (not just `output_text.delta`), because the official `openai-node` SDK's `responses.stream()` consumer relies on `response.output_item.added` arriving before any text delta — a constraint already proven to break clients like Codex when omitted (see References row 3). Tool-use blocks should still surface as italic markdown inside `output_text.delta` (low-risk compatibility shim), with a documented upgrade path to native `function_call` items. The Claude Agent SDK still respects `CLAUDE_CODE_USE_FOUNDRY=1` + `ANTHROPIC_FOUNDRY_RESOURCE` + optional `ANTHROPIC_FOUNDRY_API_KEY`; the only behavioural risk in the v0.2.x line is the v0.2.113 revert that made `options.env` *replace* (not overlay) `process.env` — meaning the new runner must spread `process.env` explicitly when injecting provider env. Vitest stays. Apple `container` is treated as a Docker drop-in for v1, with a `pathToClaudeCodeExecutable` override retained as defensive insurance against virtiofs path-resolution flakiness.
 
 ## Context
 
 - Source: existing `agent-host/` service inside `open-webui-phase1` (TypeScript, Node ≥ 22, Fastify 5, Zod 4, Pino, Undici, `@anthropic-ai/claude-agent-sdk@^0.2.138`).
-- Target: greenfield standalone project at `/Users/giorgosmarinos/aiwork/agent-host-cc/`, must have **zero runtime/build/path linkage** back to `open-webui-phase1` (NF-1).
-- Authoritative requirements: `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/refined-request.md`, with the "User Confirmation (2026-05-10)" block at the top overriding earlier draft language. The user has confirmed: standalone, both `/v1/chat/completions` AND `/v1/responses` in v1, Anthropic public API as default with Foundry opt-in, local Docker + Apple `container` only, cc-monitor out of scope.
-- Codebase scan: `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/codebase-scan-source-agent-host.md` enumerates every file, dependency, env var, and sanitization target.
+- Target: greenfield standalone project at ``, must have **zero runtime/build/path linkage** back to `open-webui-phase1` (NF-1).
+- Authoritative requirements: `docs/design/refined-request.md`, with the "User Confirmation (2026-05-10)" block at the top overriding earlier draft language. The user has confirmed: standalone, both `/v1/chat/completions` AND `/v1/responses` in v1, Anthropic public API as default with Foundry opt-in, local Docker + Apple `container` only, cc-monitor out of scope.
+- Codebase scan: `docs/reference/codebase-scan-source-agent-host.md` enumerates every file, dependency, env var, and sanitization target.
 
 ## Options Identified
 
@@ -178,7 +178,7 @@ The source `Dockerfile` is portable today: `node:22-alpine`, multi-stage `deps`/
 
 ### Focus Area 7 — Documentation Set
 
-#### Recommended document set (target paths under `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/`)
+#### Recommended document set (target paths under `docs/`)
 
 | New doc | Source doc(s) to mine | Treatment |
 |---|---|---|
@@ -262,9 +262,9 @@ Suggested first steps for Phase 4 planning: produce the three plan files in the 
 | 5 | Microsoft DevBlogs: Claude Code + Microsoft Foundry setup | https://devblogs.microsoft.com/all-things-azure/claude-code-microsoft-foundry-enterprise-ai-coding-agent-setup/ | Confirms `CLAUDE_CODE_USE_FOUNDRY=1`, `ANTHROPIC_FOUNDRY_RESOURCE`, `ANTHROPIC_FOUNDRY_API_KEY` env-var names are stable |
 | 6 | Anthropic Agent SDK overview | https://platform.claude.com/docs/en/agent-sdk/overview | Lists Foundry/Bedrock/Vertex provider env vars; documents `ANTHROPIC_API_KEY` as the default-public-API selector |
 | 7 | claude-agent-sdk-typescript CHANGELOG | https://github.com/anthropics/claude-agent-sdk-typescript/blob/main/CHANGELOG.md | v0.2.113 reverted `options.env` to **replace** semantics — drives the "spread `process.env`" mitigation in Focus Area 3 |
-| 8 | Refined request | /Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/refined-request.md | Authoritative requirements + User Confirmation 2026-05-10 |
-| 9 | Codebase scan | /Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/codebase-scan-source-agent-host.md | Module map, env vars, sanitization targets, Dockerfile analysis |
+| 8 | Refined request | docs/design/refined-request.md | Authoritative requirements + User Confirmation 2026-05-10 |
+| 9 | Codebase scan | docs/reference/codebase-scan-source-agent-host.md | Module map, env vars, sanitization targets, Dockerfile analysis |
 
 ## Original Request
 
-The user requested an investigation of the best approach to deliver `agent-host-cc` covering: extraction strategy, OpenAI Responses API implementation, provider decoupling (Anthropic public default, Foundry opt-in), tool_use rendering on the Responses surface, containerization on Apple `container` and Docker, test framework continuity, and documentation strategy. Authoritative input: refined-request.md (with the 2026-05-10 user-confirmation block overriding earlier draft language) and the codebase scan. Investigation saved at `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/investigation-extraction-approach.md`.
+The user requested an investigation of the best approach to deliver `agent-host-cc` covering: extraction strategy, OpenAI Responses API implementation, provider decoupling (Anthropic public default, Foundry opt-in), tool_use rendering on the Responses surface, containerization on Apple `container` and Docker, test framework continuity, and documentation strategy. Authoritative input: refined-request.md (with the 2026-05-10 user-confirmation block overriding earlier draft language) and the codebase scan. Investigation saved at `docs/reference/investigation-extraction-approach.md`.

@@ -1,6 +1,6 @@
 # Project Functions Register — `agent-host-cc`
 
-> **Source of truth:** `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/refined-request.md` (User Confirmation 2026-05-10 block overrides earlier draft language).
+> **Source of truth:** `docs/design/refined-request.md` (User Confirmation 2026-05-10 block overrides earlier draft language).
 >
 > **Purpose:** Authoritative register of every functional and non-functional requirement the project commits to deliver. Each row captures the requirement verbatim and a tracking status. As implementation progresses, the Status column moves through `planned → in-progress → implemented → verified`.
 >
@@ -38,7 +38,7 @@
 
 | ID | Requirement (verbatim from refined-request-chat-ui.md) | Status |
 |---|---|---|
-| FU-CU-1 | Subfolder layout — `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/`, own `package.json`/`tsconfig.json`/`src/`/`README.md`, no import from host `src/`. | implemented |
+| FU-CU-1 | Subfolder layout — `chat-ui/`, own `package.json`/`tsconfig.json`/`src/`/`README.md`, no import from host `src/`. | implemented |
 | FU-CU-2 | TypeScript only; Node ≥ 22; ESM; strict TS. | implemented |
 | FU-CU-3 | Browser SPA served by a local Fastify server bound to `127.0.0.1:<port>`. | implemented |
 | FU-CU-4 | Three backend kinds: `agent-host-cc`, `openai`, `azure-openai`. | implemented |
@@ -60,7 +60,7 @@
 
 | ID | Requirement (verbatim from refined-request.md) | Status |
 |---|---|---|
-| NF-1 | **Self-containment.** The new project MUST NOT import, reference, copy at runtime, or rely on any path inside `/Users/giorgosmarinos/aiwork/open-webui-phase1/`. A grep for `open-webui-phase1`, `phase1`, `claude-bridge`, `claude-skills`, `claude-artifact-server`, `cc-monitor`, or `pipelines` in the new project's source, configs, and docs MUST yield only intentional historical references in `docs/reference/` (clearly marked as historical context). | planned |
+| NF-1 | **Self-containment.** The new project MUST NOT import, reference, copy at runtime, or rely on any path inside `<source-repo>/`. A grep for `open-webui-phase1`, `phase1`, `claude-bridge`, `claude-skills`, `claude-artifact-server`, `cc-monitor`, or `pipelines` in the new project's source, configs, and docs MUST yield only intentional historical references in `docs/reference/` (clearly marked as historical context). | planned |
 | NF-2 | **Conformance to project conventions.** All TypeScript, ESM, Node ≥ 22, Fastify, Zod, Pino, Undici, vitest. Test scripts (acceptance, smoke) live under `/test_scripts/`. Plans live under `/docs/design/plan-xxx-*.md`. Functional requirements are registered in `/docs/design/project-functions.md`. The complete design lives in `/docs/design/project-design.md`. Issue tracker at `/Issues - Pending Items.md`. | planned |
 | NF-3 | **No silent fallbacks.** Required configuration MUST never silently fall back to a default. The single intentional derived-value exception (deterministic `chatId` hash when `metadata.chat_id` is absent) MUST be documented in `docs/design/project-design.md` AND in the project's CLAUDE.md memory exception list before being implemented. | planned |
 | NF-4 | **Test coverage parity.** Every unit test in the source project's `test/unit/` tree MUST have an equivalent in the new project (potentially renamed/refactored to drop Open-WebUI-specific naming) and MUST pass green. Integration tests (`test/integration/`) MUST be ported with mocks renamed to neutral providers (e.g., `mockFoundry.ts` becomes `mockAnthropicProvider.ts` or similar; `mockOpenWebUI.ts` becomes `mockFilesApi.ts`). | planned |

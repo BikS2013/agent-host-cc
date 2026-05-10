@@ -10,9 +10,8 @@ export interface RunRequest {
   /**
    * Optional Fastify Pino logger (per-request). When provided the runner
    * emits the agent.* lifecycle log lines (session-init, tool-use,
-   * tool-result, assistant-text, end-of-turn) consumed by the
-   * agent-host-monitor PinoJsonParser. See
-   * /Users/giorgosmarinos/aiwork/agent-host-monitor/docs/design/plan-002-agent-parser-and-pino-instrumentation.md §B.
+   * tool-result, assistant-text, end-of-turn) intended for downstream
+   * log consumers.
    */
   log?: FastifyBaseLogger;
 }

@@ -2,14 +2,14 @@
 
 > **Status:** Authoritative technical design. Produced in Phase 5 of the workflow.
 > **Authoritative inputs:**
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/refined-request.md` (User Confirmation 2026-05-10 block overrides everything below it).
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/plan-001-extract-and-rebrand.md`
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/plan-002-decouple-from-foundry.md`
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/plan-003-add-responses-api.md`
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-functions.md`
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/codebase-scan-source-agent-host.md`
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/investigation-extraction-approach.md`
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/Issues - Pending Items.md` (DISC-1 supersedes the F-20 wording about `reasoning` items — see §5.5 below).
+> - `docs/design/refined-request.md` (User Confirmation 2026-05-10 block overrides everything below it).
+> - `docs/design/plan-001-extract-and-rebrand.md`
+> - `docs/design/plan-002-decouple-from-foundry.md`
+> - `docs/design/plan-003-add-responses-api.md`
+> - `docs/design/project-functions.md`
+> - `docs/reference/codebase-scan-source-agent-host.md`
+> - `docs/reference/investigation-extraction-approach.md`
+> - `Issues - Pending Items.md` (DISC-1 supersedes the F-20 wording about `reasoning` items — see §5.5 below).
 >
 > **Audience:** Implementation engineers (human and Claude sub-agents), reviewers, future operators.
 
@@ -23,7 +23,7 @@
 
 ### 1.2 Architectural goals
 
-- **Standalone.** Zero build, runtime, or path linkage back to `/Users/giorgosmarinos/aiwork/open-webui-phase1/`. The project tree must continue to build and run after the source repository is renamed or removed (NF-1, AC-1).
+- **Standalone.** Zero build, runtime, or path linkage back to `<source-repo>/`. The project tree must continue to build and run after the source repository is renamed or removed (NF-1, AC-1).
 - **OpenAI-compatible.** Both `/v1/chat/completions` (Chat Completions chunks ending with `data: [DONE]\n\n`) and `/v1/responses` (canonical Responses event envelope ending with `data: [DONE]\n\n`) are implemented to bit-level conformance with what the official `openai` Node SDK consumes (F-1, F-20, F-21, AC-16, AC-20).
 - **Provider-agnostic.** The Anthropic public API is the default provider; Azure AI Foundry is opt-in via `CLAUDE_CODE_USE_FOUNDRY=1`. Exactly one provider resolves at startup; ambiguous or partial provider configuration causes a typed `ConfigurationError` and exit code 78. The discriminated union leaves room for Bedrock/Vertex arms in the future (F-13, AC-6, AC-7, FUT-7).
 - **Container-native.** A multi-stage `node:22-alpine` Dockerfile producing a non-root image (`agent`, uid=1000) listening on the configured port, with a single writable mount target at `/workspace`. Buildable and runnable on Docker, Apple `container`, or any other OCI-compliant runtime without per-platform forking (F-18, AC-3).
@@ -238,11 +238,11 @@ The container is a **single-process** node service. There is no sidecar, no DB, 
 
 ## 3. Module structure
 
-All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/src/`. Imports use named ESM imports with explicit `.js` extensions (Node ≥ 22, `"moduleResolution": "bundler"` in `tsconfig.json`). No path aliases. Every stateful module is a factory function (`createX(...) → X`) returning a plain object — no classes.
+All TypeScript sources live under `src/`. Imports use named ESM imports with explicit `.js` extensions (Node ≥ 22, `"moduleResolution": "bundler"` in `tsconfig.json`). No path aliases. Every stateful module is a factory function (`createX(...) → X`) returning a plain object — no classes.
 
 ### 3.1 `src/index.ts`
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/index.ts`
+- **Path:** `src/index.ts`
 - **Exports:** `main(): Promise<void>` (default-invoked under `if (import.meta.url === ... )`)
 - **Responsibilities:**
   - Call `loadConfig(process.env)` → `Config`. On `ConfigurationError`, log the missing variable and `process.exit(78)`.
@@ -258,7 +258,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.2 `src/httpServer.ts`
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/httpServer.ts`
+- **Path:** `src/httpServer.ts`
 - **Exports:**
   - `buildApp(opts: HttpServerOptions): Promise<FastifyInstance>` — Fastify factory.
   - `HttpServerOptions` — `{cfg, workspaceManager, attachmentProcessor, runner}`.
@@ -277,7 +277,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.3 `src/config.ts`
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/config.ts`
+- **Path:** `src/config.ts`
 - **Exports:**
   - `Config` (interface) — see §4.1 for the full shape.
   - `Provider` (discriminated union) — see §4.1.
@@ -295,7 +295,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.4 `src/errors.ts`
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/errors.ts`
+- **Path:** `src/errors.ts`
 - **Exports:**
   - `AgentHostError` (abstract base; `httpStatus`, `errorType`, `toErrorEnvelope(): ErrorEnvelope`).
   - `ConfigurationError(missingKey: string)` — exit 78, but NOT an HTTP error.
@@ -314,7 +314,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.5 `src/types.ts`
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/types.ts`
+- **Path:** `src/types.ts`
 - **Exports:**
   - `ChatCompletionRequestSchema` (Zod) and inferred `ChatCompletionRequest` (TS type).
   - `ResponsesRequestSchema` (Zod) and inferred `ResponsesRequest` (TS type) — added by plan-003 Phase 4.
@@ -330,7 +330,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.6 `src/agentRunner.ts`
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/agentRunner.ts`
+- **Path:** `src/agentRunner.ts`
 - **Exports:**
   - `interface AgentRunner { run(req: RunRequest): AsyncIterable<unknown>; }` — the iterator yields raw SDK events; adapters interpret them.
   - `interface RunRequest { messages: Message[]; model: string; chatId: string; signal?: AbortSignal; }`
@@ -339,7 +339,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.7 `src/claudeCodeRunner.ts`
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/claudeCodeRunner.ts`
+- **Path:** `src/claudeCodeRunner.ts`
 - **Exports:**
   - `createClaudeCodeRunner(opts: ClaudeCodeRunnerOptions): AgentRunner`
   - `interface ClaudeCodeRunnerOptions { provider: Provider; agentTimeoutMs: number; agentMaxTurns: number; workspaceDir: string; }`
@@ -357,7 +357,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.8 `src/openAiChatSseAdapter.ts` (renamed from `openAiResponseAdapter.ts`)
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/openAiChatSseAdapter.ts`
+- **Path:** `src/openAiChatSseAdapter.ts`
 - **Renamed from:** `src/openAiResponseAdapter.ts` (per plan-003 Phase 1; the original file's content emits Chat Completions SSE chunks despite the misleading source name).
 - **Exports:**
   - `interface SseHeader { id: string; model: string; created: number; }`
@@ -374,7 +374,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.9 `src/openAiResponseAdapter.ts` (NEW — Responses API impl)
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/openAiResponseAdapter.ts`
+- **Path:** `src/openAiResponseAdapter.ts`
 - **Created by:** plan-003 Phase 2.
 - **Exports:**
   - `interface ResponsesHeader { id: string; model: string; created: number; }`
@@ -386,7 +386,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.10 `src/attachmentProcessor.ts` (orchestrator)
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/attachmentProcessor.ts`
+- **Path:** `src/attachmentProcessor.ts`
 - **Exports:**
   - `createAttachmentProcessor(opts: AttachmentProcessorOptions): AttachmentProcessor`
   - `interface AttachmentProcessorOptions { workspaceManager, baseUrl, apiKey, pathTemplate, maxInlineImageBytes, maxRemoteFetchBytes, maxUrlFetchesPerTurn, urlFetchTimeoutMs, ssrfBypass?: boolean }`
@@ -405,7 +405,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.11 `src/attachmentProcessor/dataUrlDecoder.ts`
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/attachmentProcessor/dataUrlDecoder.ts`
+- **Path:** `src/attachmentProcessor/dataUrlDecoder.ts`
 - **Exports:** `decodeDataUrl(s: string): DecodedDataUrl`, `isDataUrl(s: string): boolean`, `interface DecodedDataUrl { mime: string; bytes: Buffer; ext: string; }`.
 - **Behavior:** Parse `data:<mime>;base64,<payload>`; decode base64; map MIME → file extension via a built-in table (`image/png` → `.png`, `application/pdf` → `.pdf`, …); return both.
 - **Dependencies:** `node:buffer`.
@@ -413,7 +413,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.12 `src/attachmentProcessor/ssrfGuard.ts`
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/attachmentProcessor/ssrfGuard.ts`
+- **Path:** `src/attachmentProcessor/ssrfGuard.ts`
 - **Exports:** `assertSafeUrl(url: string): Promise<void>` — throws `UnsafeUrlError` on:
   - non-`http`/`https` scheme,
   - hostname resolves (DNS) to any IP in `127.0.0.0/8`, `10.0.0.0/8`, `172.16.0.0/12`, `192.168.0.0/16`, `169.254.0.0/16`, `::1`, `fc00::/7`, `fe80::/10`.
@@ -422,7 +422,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.13 `src/attachmentProcessor/remoteUrlFetcher.ts`
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/attachmentProcessor/remoteUrlFetcher.ts`
+- **Path:** `src/attachmentProcessor/remoteUrlFetcher.ts`
 - **Exports:** `fetchRemoteUrl(url, opts): Promise<FetchedRemote>`, `interface FetchOptions { maxBytes; timeoutMs; ssrfBypass?: boolean; }`, `interface FetchedRemote { url; mime; bytes: Buffer; ext: string; }`.
 - **Behavior:** call `assertSafeUrl(url)` unless `ssrfBypass` (test only); use `undici.request` with timeout; stream-cap at `maxBytes` (throws `UpstreamUrlFetchError` if exceeded); read `content-type` to derive ext.
 - **Dependencies:** `undici`, `./ssrfGuard.js`, `../errors.js`.
@@ -430,7 +430,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.14 `src/attachmentProcessor/filesApiFetcher.ts`
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/attachmentProcessor/filesApiFetcher.ts`
+- **Path:** `src/attachmentProcessor/filesApiFetcher.ts`
 - **Exports:** `fetchFromFilesApi(id: string, opts: FilesApiOptions): Promise<FetchedFile>` (renamed from `fetchFromOpenWebUiFiles` per plan-001 Phase B.3), `interface FilesApiOptions { baseUrl: string; apiKey: string; pathTemplate: string; maxBytes: number; timeoutMs: number; }`, `interface FetchedFile { id; filename; mime; bytes: Buffer; ext: string; }`.
 - **Behavior:** Construct URL as `baseUrl + pathTemplate.replace("{id}", encodeURIComponent(id))`; bearer-auth with `apiKey`; stream-cap at `maxBytes`; throws `UpstreamFilesFetchError({fileId: id, status, cause})` on non-2xx.
 - **Dependencies:** `undici`, `../errors.js`.
@@ -438,14 +438,14 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 
 ### 3.15 `src/attachmentProcessor/urlDetector.ts`
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/attachmentProcessor/urlDetector.ts`
+- **Path:** `src/attachmentProcessor/urlDetector.ts`
 - **Exports:** `extractUrls(text: string): string[]` — strips fenced code blocks (\`\`\`…\`\`\`) and inline code (\`…\`) regions first, then matches a conservative `https?://` regex. Dedupes preserving order.
 - **Dependencies:** none.
 - **Invoked from:** `attachmentProcessor.ts`.
 
 ### 3.16 `src/workspaceManager.ts`
 
-- **Path:** `/Users/giorgosmarinos/aiwork/agent-host-cc/src/workspaceManager.ts`
+- **Path:** `src/workspaceManager.ts`
 - **Exports:**
   - `createWorkspaceManager(opts: WorkspaceManagerOptions): WorkspaceManager`
   - `interface WorkspaceManagerOptions { rootDir: string; maxBytesPerChat: number; }`
@@ -466,7 +466,7 @@ All TypeScript sources live under `/Users/giorgosmarinos/aiwork/agent-host-cc/sr
 ### 3.17 `src/attachmentProcessor/` directory layout summary
 
 ```
-/Users/giorgosmarinos/aiwork/agent-host-cc/src/attachmentProcessor/
+src/attachmentProcessor/
 ├── dataUrlDecoder.ts
 ├── ssrfGuard.ts
 ├── remoteUrlFetcher.ts
@@ -978,7 +978,7 @@ The refined-request F-20 wording mentions `response.output_item.added` items wit
 
 ## 6. Configuration model
 
-The full configuration guide will be authored under `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/configuration-guide.md` by Phase 6 Unit G. This section enumerates the variables, the resolution priority chain, and the two intentional silent-default exceptions.
+The full configuration guide will be authored under `docs/design/configuration-guide.md` by Phase 6 Unit G. This section enumerates the variables, the resolution priority chain, and the two intentional silent-default exceptions.
 
 ### 6.1 Variables grouped by purpose
 
@@ -1037,7 +1037,7 @@ The service starts in either case (does not exit). Variables: `AGENT_HOST_API_KE
 
 ### 6.4 Two intentional silent-default exceptions (NF-3)
 
-Per the project rule "no silent fallbacks for configuration", the following two fallbacks are explicit, approved exceptions. Both must be registered in `/Users/giorgosmarinos/aiwork/agent-host-cc/CLAUDE.md` under a section "Configuration Fallback Exceptions" **before** code introduces them — that registration is plan-001 Phase G.
+Per the project rule "no silent fallbacks for configuration", the following two fallbacks are explicit, approved exceptions. Both must be registered in `CLAUDE.md` under a section "Configuration Fallback Exceptions" **before** code introduces them — that registration is plan-001 Phase G.
 
 #### Exception 1 — `WORKSPACE_DIR=/workspace`
 
@@ -1122,9 +1122,9 @@ The Phase 6 orchestrator dispatches independent agents to implement disjoint sli
 
 **Description:** Copy the source `agent-host/` tree into the new project, excluding `node_modules/`, `dist/`, `package-lock.json`. Produces a baseline that compiles after `npm install`.
 
-**Inputs:** read-only access to `/Users/giorgosmarinos/aiwork/open-webui-phase1/agent-host/`.
+**Inputs:** read-only access to `<source-repo>/agent-host/`.
 
-**Files created (all absolute under `/Users/giorgosmarinos/aiwork/agent-host-cc/`):**
+**Files created (all absolute under ``):**
 
 - `src/index.ts`
 - `src/httpServer.ts`
@@ -1177,18 +1177,18 @@ The Phase 6 orchestrator dispatches independent agents to implement disjoint sli
 - `test/fixtures/mockOpenWebUI.ts` → `test/fixtures/mockFilesApi.ts`
 
 **Files modified (absolute paths):**
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/config.ts` (env var renames + `MODEL_PREFIX`, `FILES_API_PATH_TEMPLATE`)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/index.ts` (label updates for expiry warnings)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/httpServer.ts` (`stripModelPrefix` reads from `cfg.modelPrefix`; comments neutralized)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/attachmentProcessor.ts` (import + call rename)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/attachmentProcessor/filesApiFetcher.ts` (function rename + path-template support)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/errors.ts` (single string rewrite at line 69)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/config.test.ts` (env var renames + `MODEL_PREFIX` cases)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/filesApiFetcher.test.ts` (describe block rename + path-template test)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/httpServer.test.ts` (`MODEL_PREFIX` cases)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/integration/agentHost.integration.test.ts` (fixture imports)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/package.json` (name, description, drop `@fastify/multipart`)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/Dockerfile` (uid=1000 pin, drop install fallback)
+- `src/config.ts` (env var renames + `MODEL_PREFIX`, `FILES_API_PATH_TEMPLATE`)
+- `src/index.ts` (label updates for expiry warnings)
+- `src/httpServer.ts` (`stripModelPrefix` reads from `cfg.modelPrefix`; comments neutralized)
+- `src/attachmentProcessor.ts` (import + call rename)
+- `src/attachmentProcessor/filesApiFetcher.ts` (function rename + path-template support)
+- `src/errors.ts` (single string rewrite at line 69)
+- `test/unit/config.test.ts` (env var renames + `MODEL_PREFIX` cases)
+- `test/unit/filesApiFetcher.test.ts` (describe block rename + path-template test)
+- `test/unit/httpServer.test.ts` (`MODEL_PREFIX` cases)
+- `test/integration/agentHost.integration.test.ts` (fixture imports)
+- `package.json` (name, description, drop `@fastify/multipart`)
+- `Dockerfile` (uid=1000 pin, drop install fallback)
 
 **Files deleted:** none directly (renames handle the old names).
 **Depends on:** Unit A.
@@ -1200,9 +1200,9 @@ The Phase 6 orchestrator dispatches independent agents to implement disjoint sli
 **Description:** Refactor `config.ts` and `claudeCodeRunner.ts` to introduce the discriminated `Provider` union and the two-branch env injection (per plan-002 Phases A, B).
 
 **Files modified (absolute paths):**
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/config.ts` (introduce `Provider`; rewrite provider selection)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/claudeCodeRunner.ts` (consume `Provider`; spread `process.env`)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/index.ts` (call site update — `provider: cfg.provider`)
+- `src/config.ts` (introduce `Provider`; rewrite provider selection)
+- `src/claudeCodeRunner.ts` (consume `Provider`; spread `process.env`)
+- `src/index.ts` (call site update — `provider: cfg.provider`)
 
 **Depends on:** Unit A. Sequenced **after** Unit B if both touch `src/config.ts` and `src/index.ts` (overlap). The orchestrator should serialize Unit B → Unit C on the shared `config.ts` and `index.ts` files, OR merge them into a single conjoint unit. Recommendation: **run B and C sequentially in the same agent** (not in parallel) because both touch `config.ts`.
 
@@ -1213,12 +1213,12 @@ The Phase 6 orchestrator dispatches independent agents to implement disjoint sli
 **Description:** Rename the existing `openAiResponseAdapter.ts` (which actually emits Chat Completions chunks) to `openAiChatSseAdapter.ts`, and update all imports (per plan-003 Phase 1).
 
 **Files renamed:**
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/openAiResponseAdapter.ts` → `/Users/giorgosmarinos/aiwork/agent-host-cc/src/openAiChatSseAdapter.ts`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/openAiResponseAdapter.test.ts` → `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/openAiChatSseAdapter.test.ts`
+- `src/openAiResponseAdapter.ts` → `src/openAiChatSseAdapter.ts`
+- `test/unit/openAiResponseAdapter.test.ts` → `test/unit/openAiChatSseAdapter.test.ts`
 
 **Files modified (absolute paths):**
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/httpServer.ts` (import path `./openAiChatSseAdapter.js`)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/openAiChatSseAdapter.test.ts` (import path inside the renamed file)
+- `src/httpServer.ts` (import path `./openAiChatSseAdapter.js`)
+- `test/unit/openAiChatSseAdapter.test.ts` (import path inside the renamed file)
 
 **Depends on:** Unit A.
 **Blocks:** Unit E (Unit E creates a NEW `openAiResponseAdapter.ts` once the name is free).
@@ -1229,12 +1229,12 @@ The Phase 6 orchestrator dispatches independent agents to implement disjoint sli
 **Description:** Create the brand-new `openAiResponseAdapter.ts` emitting the canonical Responses event sequence; mount `POST /v1/responses` in `httpServer.ts`; add `ResponsesRequestSchema` to `types.ts`; add `RESPONSES_TOOL_USE_RENDERING` to `config.ts` (per plan-003 Phases 2, 3, 4, 5).
 
 **Files created:**
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/openAiResponseAdapter.ts`
+- `src/openAiResponseAdapter.ts`
 
 **Files modified (absolute paths):**
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/httpServer.ts` (mount `POST /v1/responses` route; import the new adapter)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/types.ts` (`ResponsesRequestSchema`, `InputMessage`, `InputContentPart`, `normalizeInput`)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/src/config.ts` (`RESPONSES_TOOL_USE_RENDERING` field + reject `"item"` in v1)
+- `src/httpServer.ts` (mount `POST /v1/responses` route; import the new adapter)
+- `src/types.ts` (`ResponsesRequestSchema`, `InputMessage`, `InputContentPart`, `normalizeInput`)
+- `src/config.ts` (`RESPONSES_TOOL_USE_RENDERING` field + reject `"item"` in v1)
 
 **Depends on:** Unit D (filename must be free), Unit A. Note: also touches `src/httpServer.ts` and `src/config.ts` — sequencing with Units B/C/D required.
 **Blocks:** Unit F.
@@ -1244,19 +1244,19 @@ The Phase 6 orchestrator dispatches independent agents to implement disjoint sli
 **Description:** Port + extend tests to cover the renamed env vars, the discriminated provider, and the new Responses adapter. Add smoke scripts under `test_scripts/`.
 
 **Files created:**
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/openAiResponseAdapter.test.ts` *(NEW — distinct from the renamed Chat adapter test)*
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/integration/agentHost.responses.integration.test.ts`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/integration/_helpers.ts` (optional)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test_scripts/smoke-anthropic-public.ts`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test_scripts/smoke-foundry.ts`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test_scripts/smoke-responses-sdk.ts`
+- `test/unit/openAiResponseAdapter.test.ts` *(NEW — distinct from the renamed Chat adapter test)*
+- `test/integration/agentHost.responses.integration.test.ts`
+- `test/integration/_helpers.ts` (optional)
+- `test_scripts/smoke-anthropic-public.ts`
+- `test_scripts/smoke-foundry.ts`
+- `test_scripts/smoke-responses-sdk.ts`
 
 **Files modified (absolute paths):**
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/claudeCodeRunner.test.ts` (public-API path test + Foundry path test + `process.env` survival assertion)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/config.test.ts` (provider union cases — public happy, Foundry happy, Foundry partial fail, public missing fail)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/unit/types.test.ts` (`ResponsesRequestSchema` cases)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/integration/agentHost.integration.test.ts` (Foundry mode + public mode integration paths; rename to `agentHost.chat.integration.test.ts` if helpers split)
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/test/fixtures/mockAnthropicProvider.ts` (factory accepting `{mode:"public"|"foundry"}`)
+- `test/unit/claudeCodeRunner.test.ts` (public-API path test + Foundry path test + `process.env` survival assertion)
+- `test/unit/config.test.ts` (provider union cases — public happy, Foundry happy, Foundry partial fail, public missing fail)
+- `test/unit/types.test.ts` (`ResponsesRequestSchema` cases)
+- `test/integration/agentHost.integration.test.ts` (Foundry mode + public mode integration paths; rename to `agentHost.chat.integration.test.ts` if helpers split)
+- `test/fixtures/mockAnthropicProvider.ts` (factory accepting `{mode:"public"|"foundry"}`)
 
 **Depends on:** Units B, C, E.
 **Blocks:** none.
@@ -1266,14 +1266,14 @@ The Phase 6 orchestrator dispatches independent agents to implement disjoint sli
 **Description:** Author the operator-facing documentation set.
 
 **Files created:**
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/configuration-guide.md`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/how-to/deploy-locally.md`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/how-to/connect-openai-client.md`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/source-extraction-notes.md`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/historical-context-cc-monitor.md`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/README.md`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/.env.example`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/docker-compose.yml`
+- `docs/design/configuration-guide.md`
+- `docs/how-to/deploy-locally.md`
+- `docs/how-to/connect-openai-client.md`
+- `docs/reference/source-extraction-notes.md`
+- `docs/reference/historical-context-cc-monitor.md`
+- `README.md`
+- `.env.example`
+- `docker-compose.yml`
 
 **Files modified:** none in `src/` or `test/`.
 **Depends on:** Unit A (so the design lives alongside a real source tree). Can run **in parallel** with all other units because no source/test files overlap.
@@ -1482,20 +1482,20 @@ USER node
 
 ## 12. Cross-references
 
-- **Functional requirements:** `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-functions.md` (F-1 … F-21, NF-1 … NF-6).
+- **Functional requirements:** `docs/design/project-functions.md` (F-1 … F-21, NF-1 … NF-6).
 - **Acceptance criteria:** refined-request §"Acceptance Criteria" (AC-1 … AC-20).
 - **Plans:**
-  - Extraction + rebrand: `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/plan-001-extract-and-rebrand.md`
-  - Provider decoupling: `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/plan-002-decouple-from-foundry.md`
-  - Responses API: `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/plan-003-add-responses-api.md`
+  - Extraction + rebrand: `docs/design/plan-001-extract-and-rebrand.md`
+  - Provider decoupling: `docs/design/plan-002-decouple-from-foundry.md`
+  - Responses API: `docs/design/plan-003-add-responses-api.md`
 - **Reference material:**
-  - Codebase scan (source `agent-host`): `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/codebase-scan-source-agent-host.md`
-  - Investigation: `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/investigation-extraction-approach.md`
-- **Issue log:** `/Users/giorgosmarinos/aiwork/agent-host-cc/Issues - Pending Items.md` (DISC-1 resolved by this design — see §5.5 and ADR-4).
-- **Configuration guide (to be authored under Unit G):** `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/configuration-guide.md`.
+  - Codebase scan (source `agent-host`): `docs/reference/codebase-scan-source-agent-host.md`
+  - Investigation: `docs/reference/investigation-extraction-approach.md`
+- **Issue log:** `Issues - Pending Items.md` (DISC-1 resolved by this design — see §5.5 and ADR-4).
+- **Configuration guide (to be authored under Unit G):** `docs/design/configuration-guide.md`.
 - **Runbooks (to be authored under Unit G):**
-  - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/how-to/deploy-locally.md`
-  - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/how-to/connect-openai-client.md`
+  - `docs/how-to/deploy-locally.md`
+  - `docs/how-to/connect-openai-client.md`
 
 ---
 
@@ -1590,7 +1590,7 @@ The chat-ui has two distinct topologies — one for `npm run dev` (HMR) and one 
 
 ### 14.3 Module organization
 
-All paths absolute under `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/`. Mirrors plan-004 §"Master file inventory".
+All paths absolute under `chat-ui/`. Mirrors plan-004 §"Master file inventory".
 
 **`chat-ui/` (project root):**
 
@@ -2203,10 +2203,10 @@ Plan-004 defines three parallel coder units for Phase 6. The cross-unit interfac
 
 ### 14.16 Cross-references
 
-- **Plan:** `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/plan-004-chat-ui.md`
-- **Refined request:** `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/refined-request-chat-ui.md`
-- **Investigation:** `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/investigation-chat-ui.md`
-- **Codebase scan:** `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/reference/codebase-scan-chat-ui.md`
-- **Functional requirements (rows FU-CU-1 … FU-CU-17):** `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-functions.md`
+- **Plan:** `docs/design/plan-004-chat-ui.md`
+- **Refined request:** `docs/design/refined-request-chat-ui.md`
+- **Investigation:** `docs/design/investigation-chat-ui.md`
+- **Codebase scan:** `docs/reference/codebase-scan-chat-ui.md`
+- **Functional requirements (rows FU-CU-1 … FU-CU-17):** `docs/design/project-functions.md`
 - **Acceptance criteria (AC-CU-1 … AC-CU-12):** refined-request §"Acceptance criteria"
-- **README (to be authored under plan-004 Phase 9):** `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/README.md`
+- **README (to be authored under plan-004 Phase 9):** `chat-ui/README.md`

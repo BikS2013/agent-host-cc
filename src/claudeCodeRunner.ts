@@ -39,14 +39,12 @@ const CLAUDE_EXECUTABLE_PATH = resolveClaudeExecutable();
 // preview(): UTF-8-safe truncation + secret scrub helper.
 //
 // Used by the agent.* Pino log lines (session-init, tool-use, tool-result,
-// assistant-text, end-of-turn) emitted from run() below — these lines are
-// consumed by the agent-host-monitor PinoJsonParser (see plan-002 §B.2 in
-// /Users/giorgosmarinos/aiwork/agent-host-monitor/docs/design/plan-002-agent-parser-and-pino-instrumentation.md).
+// assistant-text, end-of-turn) emitted from run() below.
 //
-// Plan-002 §B.3 mandates that the *value* placed into Pino is pre-scrubbed
-// (Pino's `redact` list cannot reach inside arbitrary tool inputs/outputs),
-// so this helper applies a regex scrub for the two leakage shapes called out
-// in the plan: `sk-...` API keys and `Bearer <token>` headers. Truncation is
+// Pino's `redact` list cannot reach inside arbitrary tool inputs/outputs, so
+// the *value* placed into Pino is pre-scrubbed here. This helper applies a
+// regex scrub for the two leakage shapes seen in practice: `sk-...` API keys
+// and `Bearer <token>` headers. Truncation is
 // to a UTF-8 byte budget (NOT character count) so multi-byte runes are not
 // chopped mid-codepoint, and an ellipsis suffix marks the truncation.
 // ---------------------------------------------------------------------------
@@ -261,12 +259,9 @@ export const createClaudeCodeRunner = (opts: ClaudeCodeRunnerOptions): AgentRunn
       for await (const ev of it) {
         if (timedOut) throw new AgentTimeoutError();
         // ---------------------------------------------------------------
-        // agent.* Pino instrumentation (plan-002 §B). Side-effect only —
-        // the SDK event is still yielded unchanged below. Field shapes
-        // below MUST match the authoritative Pino → AgentEvent mapping
-        // table in
-        //   /Users/giorgosmarinos/aiwork/agent-host-monitor/docs/design/project-design.md §6.3
-        // and plan-002 §A. Five branches, one per SDK message shape:
+        // agent.* Pino instrumentation. Side-effect only — the SDK event
+        // is still yielded unchanged below. Five branches, one per SDK
+        // message shape:
         //   system/init   → agent.session-init
         //   assistant     → agent.tool-use OR agent.assistant-text per block
         //   user (tool_result block) → agent.tool-result

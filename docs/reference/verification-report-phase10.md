@@ -21,7 +21,7 @@ verdict: READY
 
 # Phase 10 — Integration Verification Report
 
-Project: `agent-host-cc` (root: `/Users/giorgosmarinos/aiwork/agent-host-cc/`).
+Project: `agent-host-cc` (root: ``).
 Verified against the User Confirmation block of `docs/design/refined-request.md`.
 
 ## 1. Build verification — PASS
@@ -181,7 +181,7 @@ The agent-host-cc project ships:
 - Zero npm vulnerabilities at any severity.
 - Full documentation set under `docs/design`, `docs/how-to`, `docs/reference`.
 - Zero forbidden tokens (`OPENWEBUI`, `phase1`, `cc-monitor`, etc.) anywhere outside `docs/`.
-- Zero coupling to `/Users/giorgosmarinos/aiwork/open-webui-phase1/`.
+- Zero coupling to `<source-repo>/`.
 
 The 6 ACs marked "NOT-APPLICABLE-IN-OFFLINE-VERIFICATION" are validated indirectly by mocked-contract unit and integration tests. They become directly verifiable the moment an operator supplies an Anthropic API key (AC-6, AC-16, AC-20), Foundry credentials (AC-7), and a working Docker / Apple `container` runtime (AC-3) — none of which can be staged inside this sandbox.
 

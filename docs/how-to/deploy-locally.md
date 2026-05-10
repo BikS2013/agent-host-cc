@@ -3,9 +3,9 @@
 > **Audience:** Operators standing up `agent-host-cc` on a developer workstation or single host.
 > **Outcome:** A running container (Docker or Apple `container`) listening on `http://localhost:8000`, exposing `GET /healthz`, `GET /v1/models`, `POST /v1/chat/completions`, `POST /v1/responses`, and `GET /files/:chatId/*path`.
 > **Companion documents:**
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/configuration-guide.md` (every config variable)
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/how-to/connect-openai-client.md` (client wiring)
-> - `/Users/giorgosmarinos/aiwork/agent-host-cc/.env.example` (environment template)
+> - `docs/design/configuration-guide.md` (every config variable)
+> - `docs/how-to/connect-openai-client.md` (client wiring)
+> - `.env.example` (environment template)
 
 ---
 
@@ -23,7 +23,7 @@
 ## Step 1 — Clone and build
 
 ```bash
-cd /Users/giorgosmarinos/aiwork/agent-host-cc/
+cd 
 npm install
 npm run build
 ```
@@ -79,7 +79,7 @@ FILES_API_KEY=<paste-token-here>
 chmod 600 .env
 ```
 
-See `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/configuration-guide.md` for the full variable reference and the validation matrix.
+See `docs/design/configuration-guide.md` for the full variable reference and the validation matrix.
 
 ---
 
@@ -203,14 +203,14 @@ If you want the Claude Agent SDK to route via Azure AI Foundry instead of `api.a
 ```
 CLAUDE_CODE_USE_FOUNDRY=1
 ANTHROPIC_FOUNDRY_API_KEY=<paste-foundry-key>
-ANTHROPIC_FOUNDRY_RESOURCE=biksaiservice-east-us-2
+ANTHROPIC_FOUNDRY_RESOURCE=<your-foundry-resource>
 # ANTHROPIC_API_KEY may be left set; it is ignored when CLAUDE_CODE_USE_FOUNDRY=1.
 ```
 
 Restart the container. The startup log line reports the resolved provider kind so you can confirm:
 
 ```
-INFO  provider resolved kind=anthropic-foundry resource=biksaiservice-east-us-2
+INFO  provider resolved kind=anthropic-foundry resource=<your-foundry-resource>
 ```
 
 If the trio is partial — for example, `CLAUDE_CODE_USE_FOUNDRY=1` is set but `ANTHROPIC_FOUNDRY_RESOURCE` is missing — the service exits with code 78 and a `ConfigurationError` log line naming the missing variable. There is no silent fallback.

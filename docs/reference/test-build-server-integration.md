@@ -7,12 +7,12 @@ language: typescript
 framework: vitest (fastify app.inject)
 test_command_full: cd chat-ui && npx vitest run
 test_command_scope: cd chat-ui && npx vitest run test/integration/profileRoutes.test.ts test/integration/chatRelay.test.ts
-test_dir: /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/integration
-target_path: /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui
+test_dir: chat-ui/test/integration
+target_path: chat-ui
 test_files_owned:
-  - /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/integration/profileRoutes.test.ts
-  - /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/integration/chatRelay.test.ts
-  - /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/integration/helpers/buildTestServer.ts
+  - chat-ui/test/integration/profileRoutes.test.ts
+  - chat-ui/test/integration/chatRelay.test.ts
+  - chat-ui/test/integration/helpers/buildTestServer.ts
 tests_added: 40
 tests_updated: 0
 tests_run: 40
@@ -114,9 +114,9 @@ No existing test files were found for the in-scope chat-ui server endpoints. The
 
 | File | Reason |
 |---|---|
-| `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/integration/profileRoutes.test.ts` | New — profile REST endpoint integration tests |
-| `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/integration/chatRelay.test.ts` | New — chat relay SSE integration tests with mocked undici |
-| `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/integration/helpers/buildTestServer.ts` | New — shared bootstrap helper (fresh temp HOME + server per test) |
+| `chat-ui/test/integration/profileRoutes.test.ts` | New — profile REST endpoint integration tests |
+| `chat-ui/test/integration/chatRelay.test.ts` | New — chat relay SSE integration tests with mocked undici |
+| `chat-ui/test/integration/helpers/buildTestServer.ts` | New — shared bootstrap helper (fresh temp HOME + server per test) |
 
 ## 6. Test Run Results
 
@@ -216,8 +216,8 @@ This is filed for manual review — not edited into shared infra.
 
 | # | Command | Exit Code |
 |---|---|---|
-| 1 | `find /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui -type f \| sort` | 0 |
-| 2 | `ls /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/` | 0 |
+| 1 | `find chat-ui -type f \| sort` | 0 |
+| 2 | `ls chat-ui/` | 0 |
 | 3 | `cd chat-ui && npx vitest run test/integration/profileRoutes.test.ts --reporter=verbose` | 1 (1 test-bug found) |
 | 4 | Fixed UUID in profileRoutes.test.ts (test-bug correction) | — |
 | 5 | `cd chat-ui && npx vitest run test/integration/profileRoutes.test.ts --reporter=verbose` | 0 (25/25) |

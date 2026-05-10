@@ -12,7 +12,7 @@ const BASE_REQUIRED = {
 const FOUNDRY_REQUIRED = {
   ...BASE_REQUIRED,
   ANTHROPIC_FOUNDRY_API_KEY: "f",
-  ANTHROPIC_FOUNDRY_RESOURCE: "biksaiservice-east-us-2",
+  ANTHROPIC_FOUNDRY_RESOURCE: "test-foundry-resource",
   CLAUDE_CODE_USE_FOUNDRY: "1",
 };
 
@@ -49,7 +49,7 @@ describe("loadConfig", () => {
     expect(c.provider.kind).toBe("anthropic-foundry");
     if (c.provider.kind === "anthropic-foundry") {
       expect(c.provider.apiKey).toBe("f");
-      expect(c.provider.resource).toBe("biksaiservice-east-us-2");
+      expect(c.provider.resource).toBe("test-foundry-resource");
     }
   });
 

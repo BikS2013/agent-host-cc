@@ -43,7 +43,7 @@ Add a minimal, self-contained chat UI under a dedicated subfolder of the `agent-
 
 > Each requirement is numbered `FU-N` (Functional UI). Acceptance is verified by the matching AC item in the next section.
 
-- **FU-1 — Subfolder layout.** A new top-level folder `chat-ui/` MUST be added at `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/`. It MUST contain its own `package.json`, `tsconfig.json`, `src/`, and `README.md`. It MUST NOT import from `../src/` of the host service.
+- **FU-1 — Subfolder layout.** A new top-level folder `chat-ui/` MUST be added at `chat-ui/`. It MUST contain its own `package.json`, `tsconfig.json`, `src/`, and `README.md`. It MUST NOT import from `../src/` of the host service.
 
 - **FU-2 — TypeScript only.** All source files MUST be `.ts` / `.tsx`. No JavaScript source files. Node ≥ 22, ESM, strict TS.
 
@@ -182,7 +182,7 @@ Each assumption below was made because the corresponding clarification could not
 > These remain unresolved after refinement and should be confirmed (or overridden) before plan-004 is approved for execution.
 
 - **Q-1.** Confirm UI surface choice — **browser SPA** (assumed) vs terminal TUI vs Electron desktop. If the user prefers a TUI, the entire FU-3 / FU-8 / FU-14 sections will need to be reworked around a TTY library (e.g. Ink or blessed).
-- **Q-2.** Confirm subfolder name and placement — proposed: `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/`. Alternatives: `apps/chat-ui/`, `clients/chat-ui/`.
+- **Q-2.** Confirm subfolder name and placement — proposed: `chat-ui/`. Alternatives: `apps/chat-ui/`, `clients/chat-ui/`.
 - **Q-3.** Confirm profile storage location — proposed: `~/.agent-host-cc/chat-ui/profiles.json`. Alternative: a path under the `chat-ui/` folder ignored by git, or per-OS standard config dirs (`$XDG_CONFIG_HOME` on Linux, etc.).
 - **Q-4.** Confirm Azure auth model — proposed: **key-based only** (`api-key` header, `apiVersion` query). If AAD / Managed Identity is required, the profile schema gains optional `tenantId`, `clientId`, and a token-acquisition step.
 - **Q-5.** Confirm that **mid-conversation profile switches preserve history** (FU-10 / A-7). If the user prefers a reset on switch, FU-10 inverts.
@@ -194,7 +194,7 @@ Each assumption below was made because the corresponding clarification could not
 
 ```
 I want you to add in a separate folder a minimal chat UI implementation capable of going through:
-- the API implemented here (the existing agent-host-cc service at /Users/giorgosmarinos/aiwork/agent-host-cc, which exposes OpenAI-compatible Chat Completions and Responses APIs)
+- the API implemented here (the existing agent-host-cc service at <repo-root>, which exposes OpenAI-compatible Chat Completions and Responses APIs)
 - the official OpenAI API
 - the Azure Foundry OpenAI deployments
 

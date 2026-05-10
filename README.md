@@ -6,7 +6,7 @@ OpenAI-compatible HTTP host for the Anthropic Claude Code agent, packaged as a s
 
 ```bash
 # 1. Install and build.
-cd /Users/giorgosmarinos/aiwork/agent-host-cc/
+cd 
 npm install && npm run build
 
 # 2. Configure environment.
@@ -35,11 +35,11 @@ curl -s http://localhost:8000/healthz
 
 ## Documentation
 
-- **Architecture, components, request flow** — `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-design.md`.
-- **Deploy locally (Docker + Apple container, troubleshooting)** — `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/how-to/deploy-locally.md`.
-- **Connect a client (Open WebUI, OpenAI SDKs, curl)** — `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/how-to/connect-openai-client.md`.
-- **Configuration variables (every knob, defaults, validation matrix)** — `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/configuration-guide.md`.
-- **Functional and non-functional requirements** — `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-functions.md`.
+- **Architecture, components, request flow** — `docs/design/project-design.md`.
+- **Deploy locally (Docker + Apple container, troubleshooting)** — `docs/how-to/deploy-locally.md`.
+- **Connect a client (Open WebUI, OpenAI SDKs, curl)** — `docs/how-to/connect-openai-client.md`.
+- **Configuration variables (every knob, defaults, validation matrix)** — `docs/design/configuration-guide.md`.
+- **Functional and non-functional requirements** — `docs/design/project-functions.md`.
 
 ## License
 

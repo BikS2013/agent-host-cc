@@ -8,7 +8,7 @@ deprecations_initial: 0
 deprecations_final: 0
 vulnerabilities_initial: 7
 vulnerabilities_final: 7
-target_path: /Users/giorgosmarinos/aiwork/agent-host-cc
+target_path: <repo-root>
 validated_at: 2026-05-10T15:37:18Z
 last_validated_commit: null
 ---
@@ -147,11 +147,11 @@ The dependency tree is **not clean**. No changes were made to `package.json` or 
 
 | # | Command | Exit Code | Notes |
 |---|---|---|---|
-| 1 | `npm install` (cwd: `/Users/giorgosmarinos/aiwork/agent-host-cc`) | 0 | "up to date, audited 191 packages in 2s"; 7 moderate vulnerabilities reported; no deprecated package warnings |
-| 2 | `npm outdated --json` (cwd: `/Users/giorgosmarinos/aiwork/agent-host-cc`) | 1 | Exit 1 is normal when outdated packages exist; JSON parsed successfully |
-| 3 | `npm audit --json` (cwd: `/Users/giorgosmarinos/aiwork/agent-host-cc`) | 1 | Exit 1 is normal when vulnerabilities exist; 7 moderate, 0 high, 0 critical |
-| 4 | `npm ls @anthropic-ai/sdk` (cwd: `/Users/giorgosmarinos/aiwork/agent-host-cc`) | 0 | Confirmed parent chain: `agent-host-cc → @anthropic-ai/claude-agent-sdk@0.2.138 → @anthropic-ai/sdk@0.81.0` |
-| 5 | `npm ls vite` + `npm ls esbuild` (cwd: `/Users/giorgosmarinos/aiwork/agent-host-cc`) | 0 | Confirmed parent chain: `agent-host-cc → vitest@2.1.9 → vite@5.4.21 → esbuild@0.21.5`; also `tsx@4.21.0 → esbuild@0.27.7` (clean — advisory only affects <=0.24.2) |
+| 1 | `npm install` (cwd: `<repo-root>`) | 0 | "up to date, audited 191 packages in 2s"; 7 moderate vulnerabilities reported; no deprecated package warnings |
+| 2 | `npm outdated --json` (cwd: `<repo-root>`) | 1 | Exit 1 is normal when outdated packages exist; JSON parsed successfully |
+| 3 | `npm audit --json` (cwd: `<repo-root>`) | 1 | Exit 1 is normal when vulnerabilities exist; 7 moderate, 0 high, 0 critical |
+| 4 | `npm ls @anthropic-ai/sdk` (cwd: `<repo-root>`) | 0 | Confirmed parent chain: `agent-host-cc → @anthropic-ai/claude-agent-sdk@0.2.138 → @anthropic-ai/sdk@0.81.0` |
+| 5 | `npm ls vite` + `npm ls esbuild` (cwd: `<repo-root>`) | 0 | Confirmed parent chain: `agent-host-cc → vitest@2.1.9 → vite@5.4.21 → esbuild@0.21.5`; also `tsx@4.21.0 → esbuild@0.27.7` (clean — advisory only affects <=0.24.2) |
 | 6 | `npm show @anthropic-ai/sdk versions --json` | 0 | Identified fixed versions start at `0.91.1`; latest is `0.95.1` |
 | 7 | `npm show @anthropic-ai/claude-agent-sdk versions --json` | 0 | Latest is `0.2.138`; all recent versions pin `@anthropic-ai/sdk@^0.81.0` |
 | 8 | `npm show @anthropic-ai/claude-agent-sdk@0.2.138 dependencies --json` | 0 | Confirmed `"@anthropic-ai/sdk": "^0.81.0"` |

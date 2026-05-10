@@ -9,7 +9,7 @@
 >
 > **Exemption:** Per A-11 / Q-8 confirmation, this sub-app is exempt from `/tool-conventions scaffold`. Do NOT instruct any phase to invoke the tool-doc-config-architect subagent.
 >
-> **Root location:** `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/`. The host service's `src/` MUST NOT be modified by this plan.
+> **Root location:** `chat-ui/`. The host service's `src/` MUST NOT be modified by this plan.
 
 ---
 
@@ -66,9 +66,9 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
 
 **Goal:** Create the `chat-ui/` folder with package manifests, TS configs, and a Vite config. No source logic yet.
 
-**Files to create (all under `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/`):**
+**Files to create (all under `chat-ui/`):**
 
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/package.json`
+- `chat-ui/package.json`
   - Name: `agent-host-cc-chat-ui`. Private. Type: `module`. Engines `node >= 22`.
   - Direct deps: `fastify@^5`, `@fastify/static@^7`, `undici@^6`, `zod@^4`, `preact@^10`, `@preact/signals@^1`.
   - Dev deps: `vite@^5`, `@preact/preset-vite@^2`, `typescript@^5`, `tsx@^4`, `vitest@^1`, `@types/node@^22`.
@@ -82,12 +82,12 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
     - `start`: `node dist-server/index.js` (production-like single-port mode)
     - `typecheck`: `tsc -p tsconfig.server.json --noEmit && tsc -p tsconfig.json --noEmit`
     - `test`: `vitest run`
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/tsconfig.base.json` — shared compiler options (strict, ESM, ES2022 target, JSX `preserve`/`preact`).
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/tsconfig.json` — extends base; client-side; includes `client/`. JSX importSource `preact`.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/tsconfig.server.json` — extends base; server-side; includes `server/`; `outDir: "dist-server"`.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/vite.config.ts` — `@preact/preset-vite`; `root: "client"`; `build.outDir: "../dist-ui"` (relative to `client/`); dev `server.port: 5173`; `server.proxy = { "/api": "http://127.0.0.1:5174" }`.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/.gitignore` — ignores `node_modules/`, `dist-server/`, `dist-ui/`, `.env`.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test_scripts/.gitkeep` — fulfils project convention (test scripts under `test_scripts/`).
+- `chat-ui/tsconfig.base.json` — shared compiler options (strict, ESM, ES2022 target, JSX `preserve`/`preact`).
+- `chat-ui/tsconfig.json` — extends base; client-side; includes `client/`. JSX importSource `preact`.
+- `chat-ui/tsconfig.server.json` — extends base; server-side; includes `server/`; `outDir: "dist-server"`.
+- `chat-ui/vite.config.ts` — `@preact/preset-vite`; `root: "client"`; `build.outDir: "../dist-ui"` (relative to `client/`); dev `server.port: 5173`; `server.proxy = { "/api": "http://127.0.0.1:5174" }`.
+- `chat-ui/.gitignore` — ignores `node_modules/`, `dist-server/`, `dist-ui/`, `.env`.
+- `chat-ui/test_scripts/.gitkeep` — fulfils project convention (test scripts under `test_scripts/`).
 
 **Acceptance:** `cd chat-ui && npm install` succeeds; `npm run typecheck` exits 0 (no source files yet but configs valid); `npm run build` exits 0 with empty/placeholder outputs.
 
@@ -101,13 +101,13 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
 
 **Files:**
 
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/errors.ts`
+- `chat-ui/server/errors.ts`
   - `ChatUiError` base (carries `httpStatus`, `errorType`, `toEnvelope()` returning `{ error: { type, message, …extras } }`, mirroring the host service's `src/errors.ts:17–22`).
   - `ConfigurationError extends ChatUiError` (HTTP 500, `type: "configuration"`).
   - `ProfileNotFoundError extends ChatUiError` (HTTP 404, `type: "profile_not_found"`, includes `profileName`).
   - `ProfileValidationError extends ChatUiError` (HTTP 422, `type: "invalid_profile"`, includes `issues: { path, message }[]`).
   - `UpstreamError extends ChatUiError` (HTTP 502, `type: "upstream_error"`, includes upstream `status`, `body` excerpt).
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/config.ts`
+- `chat-ui/server/config.ts`
   - Exports `loadServerConfig(): { port: number; profilesPath: string; configDir: string }`.
   - `port` from `CHAT_UI_PORT` (default `5173`; `0` is allowed and means OS-assigned).
   - `profilesPath` from `CHAT_UI_PROFILES_PATH` or `~/.agent-host-cc/chat-ui/profiles.json`.
@@ -126,7 +126,7 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
 
 **Files:**
 
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/profileSchema.ts`
+- `chat-ui/server/profileSchema.ts`
   - `ProfileBaseFieldsSchema` — `name` (non-empty trimmed string), optional `systemPrompt`, optional `temperature` (number ≥ 0 ≤ 2), optional `maxTokens` (positive int).
   - `AgentHostProfileSchema` — `backendKind: z.literal("agent-host-cc")`, `baseUrl: z.string().url()`, `apiKey: z.string().min(1)`, `defaultModel: z.string().min(1)`. Hint comment: must include `MODEL_PREFIX` (typically `cc.`).
   - `OpenAiProfileSchema` — `backendKind: z.literal("openai")`, `baseUrl: z.string().url().default("https://api.openai.com")` (the only schema-level default authorised in FU-6), `apiKey: z.string().min(1)`, `defaultModel: z.string().min(1)`.
@@ -148,7 +148,7 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
 
 **Files:**
 
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/profileStore.ts`
+- `chat-ui/server/profileStore.ts`
   - `createProfileStore(profilesPath: string)` factory returning `{ list, get, upsert, remove, getRaw }`.
   - `list()`: read file, `JSON.parse`, run `ProfilesFileSchema.parse`, return `profiles.map(redactProfile)`.
   - `get(name, { reveal=false })`: as above but returns the un-redacted profile when `reveal=true`.
@@ -169,7 +169,7 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
 
 **Files:**
 
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/requestBuilder.ts`
+- `chat-ui/server/requestBuilder.ts`
   - Input: a *full* `RawProfile` (un-redacted, with `apiKey`) and the `OpenAIChatCompletionsRequestBody` produced by the SPA.
   - Output: `{ url: string; headers: Record<string,string>; body: string /* JSON */ }`.
   - Branch `agent-host-cc`: `url = ${baseUrl}/v1/chat/completions`, headers `{ Authorization: "Bearer " + apiKey, "Content-Type": "application/json", "Accept": "text/event-stream" }`, body verbatim (with `model` from request OR `profile.defaultModel` if request omits).
@@ -189,7 +189,7 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
 
 **Files:**
 
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/chatRelay.ts`
+- `chat-ui/server/chatRelay.ts`
   - Exports `registerChatRoute(app: FastifyInstance, store: ProfileStore)`.
   - Request body Zod schema: `{ profileName: string, messages: Array<{role: "system"|"user"|"assistant", content: string}>, stream?: boolean (default true), temperature?: number, max_tokens?: number }`.
   - Steps:
@@ -216,7 +216,7 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
 
 **Files:**
 
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/index.ts`
+- `chat-ui/server/index.ts`
   - `loadServerConfig()` from Phase 1.
   - `bootstrapConfigDir(...)`.
   - `const store = createProfileStore(profilesPath)`.
@@ -225,7 +225,7 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
   - Register `registerChatRoute(app, store)` (Phase 5).
   - Register profile routes (this phase, see below).
   - Listen on `127.0.0.1:CHAT_UI_PORT`. On listen, log the resolved URL.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/profileRoutes.ts`
+- `chat-ui/server/profileRoutes.ts`
   - `GET /api/profiles` → `store.list()` (redacted).
   - `POST /api/profiles` → body `ProfileSchema`; calls `store.upsert`. 201 on create, 200 on update, with redacted profile in body.
   - `PUT /api/profiles/:name` → same as POST but `name` in URL must match body.
@@ -245,19 +245,19 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
 
 **Files:**
 
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/index.html` — minimal HTML with `<div id="app"></div>` and `<script type="module" src="/src/main.ts"></script>`.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/main.ts` — `import { render } from "preact"; import { App } from "./components/App";` and mount.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/state.ts`
+- `chat-ui/client/index.html` — minimal HTML with `<div id="app"></div>` and `<script type="module" src="/src/main.ts"></script>`.
+- `chat-ui/client/src/main.ts` — `import { render } from "preact"; import { App } from "./components/App";` and mount.
+- `chat-ui/client/src/state.ts`
   - `profiles = signal<RedactedProfile[]>([])`.
   - `activeProfileName = signal<string | null>(null)`.
   - `messages = signal<UiMessage[]>([])` where `UiMessage = { id, role, kind: "chat" | "switch-banner", content: Signal<string> }` (nested signal for streaming token append).
   - `streaming = signal<boolean>(false)`.
   - `lastError = signal<{ type: string; message: string } | null>(null)`.
   - Helper actions: `loadProfiles()`, `selectProfile(name)`, `clearTranscript()`, `sendMessage(text)`, `appendDelta(delta)`.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/lib/api.ts`
+- `chat-ui/client/src/lib/api.ts`
   - Typed wrappers: `listProfiles()`, `createProfile(p)`, `updateProfile(p)`, `deleteProfile(name)`, `revealProfile(name)`.
   - Returns the parsed JSON. On non-2xx, throws an `ApiError` shaped `{ status, type, message }`.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/lib/sseClient.ts`
+- `chat-ui/client/src/lib/sseClient.ts`
   - `streamChat(body, { onDelta, onDone, onError, signal })`: opens `POST /api/chat` via `fetch` with `Accept: text/event-stream`; reads `response.body.getReader()`; parses `data: …` frames (handling chunk-boundary fragmentation by buffering until `\n\n`); calls `onDelta(text)` for each `chat.completion.chunk` delta; calls `onError(envelope.error)` when an error chunk arrives; calls `onDone()` on `data: [DONE]`.
 
 **Acceptance:** Manual: `npm run dev` brings up the SPA at `127.0.0.1:5173`, the page renders an empty shell, the network tab shows `GET /api/profiles` proxied to `127.0.0.1:5174` returning `[]`.
@@ -272,20 +272,20 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
 
 **Files:**
 
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/components/App.tsx` — two-pane layout: left `<ProfileSelector />` + actions, right `<Transcript />` + `<Composer />`.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/components/ProfileSelector.tsx`
+- `chat-ui/client/src/components/App.tsx` — two-pane layout: left `<ProfileSelector />` + actions, right `<Transcript />` + `<Composer />`.
+- `chat-ui/client/src/components/ProfileSelector.tsx`
   - Dropdown bound to `activeProfileName`. Changing emits an inline `kind: "switch-banner"` entry into `messages` (FU-10) and updates the signal.
   - "Manage…" button toggles the `<ProfileEditor />` modal.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/components/ProfileEditor.tsx`
+- `chat-ui/client/src/components/ProfileEditor.tsx`
   - Profile list with edit/delete buttons.
   - Create/edit form whose visible fields adapt to the selected `backendKind` (renders the FU-5 matrix).
   - "Reveal API key" button calls `revealProfile(name)` and shows the raw key briefly.
   - `agent-host-cc` form: on Save, optionally call `GET {baseUrl}/v1/models` (via the local proxy) and suggest discovered IDs (OD-5).
   - Validation errors from the server are rendered inline next to the offending field (uses the `issues[]` array from `ProfileValidationError`).
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/components/Transcript.tsx`
+- `chat-ui/client/src/components/Transcript.tsx`
   - Renders the `messages` signal. The in-progress assistant bubble subscribes to its own nested `content` signal so token deltas update only that node.
   - `kind: "switch-banner"` rows render with a distinct style and are NOT included when sending the next request (the `Composer.send` filters them out).
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/components/Composer.tsx`
+- `chat-ui/client/src/components/Composer.tsx`
   - Textarea + Send button. Enter sends, Shift+Enter inserts newline. Send is disabled when `streaming.value || !activeProfileName.value`.
   - On send: append a `user` message; create the in-progress `assistant` message with its own `content` signal; call `streamChat({ profileName: activeProfileName.value, messages: messagesForUpstream() })`; on each delta append to the assistant's `content` signal; on done, finalise; on error, set `lastError`.
 
@@ -301,7 +301,7 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
 
 **Files (modify):**
 
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/index.ts` — register `@fastify/static` rooted at `dist-ui/` with `prefix: "/"`. Register `app.setNotFoundHandler` that, for GET requests under non-`/api/*` paths, replies with `dist-ui/index.html` (SPA fallback). For `/api/*` 404s, return the standard error envelope.
+- `chat-ui/server/index.ts` — register `@fastify/static` rooted at `dist-ui/` with `prefix: "/"`. Register `app.setNotFoundHandler` that, for GET requests under non-`/api/*` paths, replies with `dist-ui/index.html` (SPA fallback). For `/api/*` 404s, return the standard error envelope.
 
 **Acceptance:** `npm run build && npm run start` serves the SPA at `127.0.0.1:5173` and proxies chat requests successfully against a running upstream.
 
@@ -315,10 +315,10 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
 
 **Files:**
 
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/profileSchema.test.ts` — schema validity per `backendKind`, missing-field cases, redaction.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/requestBuilder.test.ts` — three branches, Azure model-strip, system-prompt-prepend rule, profile defaults fill.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/profileStore.test.ts` — round-trip CRUD against tmp HOME; mode bits asserted on POSIX.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/integration/chatRelay.test.ts` — `buildApp()` + `undici.MockAgent` upstream returning a canned SSE body. Cases: 200 streamed deltas, mid-stream error chunk, upstream 401 surfaced as upstream_error envelope, history preserved across two consecutive chat calls with different `profileName`.
+- `chat-ui/test/unit/profileSchema.test.ts` — schema validity per `backendKind`, missing-field cases, redaction.
+- `chat-ui/test/unit/requestBuilder.test.ts` — three branches, Azure model-strip, system-prompt-prepend rule, profile defaults fill.
+- `chat-ui/test/unit/profileStore.test.ts` — round-trip CRUD against tmp HOME; mode bits asserted on POSIX.
+- `chat-ui/test/integration/chatRelay.test.ts` — `buildApp()` + `undici.MockAgent` upstream returning a canned SSE body. Cases: 200 streamed deltas, mid-stream error chunk, upstream 401 surfaced as upstream_error envelope, history preserved across two consecutive chat calls with different `profileName`.
 
 **Acceptance:** `npm test` exits 0 with all four files green.
 
@@ -332,7 +332,7 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
 
 **Files (create):**
 
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/README.md`
+- `chat-ui/README.md`
   - Install (`npm install`).
   - Dev mode (`npm run dev` — explains the two-port topology; OD-1).
   - Production-like (`npm run build && npm run start`).
@@ -344,8 +344,8 @@ These were ambiguous in the inputs; the plan picks a sensible default for each a
 
 **Files (modify in a follow-up step within this phase):**
 
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-design.md` — append a NEW section titled **"14. Chat UI sub-application (`chat-ui/`)"** with the bullet outline below; do NOT rewrite earlier sections.
-- `/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-functions.md` — append the FU-CU-1 … FU-CU-17 rows (text staged below).
+- `docs/design/project-design.md` — append a NEW section titled **"14. Chat UI sub-application (`chat-ui/`)"** with the bullet outline below; do NOT rewrite earlier sections.
+- `docs/design/project-functions.md` — append the FU-CU-1 … FU-CU-17 rows (text staged below).
 
 ### Section to append to `docs/design/project-design.md`
 
@@ -369,7 +369,7 @@ The implementer adds the following rows to the "Functional requirements" table. 
 
 | ID | Requirement (verbatim from refined-request-chat-ui.md) | Status |
 |---|---|---|
-| FU-CU-1 | Subfolder layout — `/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/`, own `package.json`/`tsconfig.json`/`src/`/`README.md`, no import from host `src/`. | planned |
+| FU-CU-1 | Subfolder layout — `chat-ui/`, own `package.json`/`tsconfig.json`/`src/`/`README.md`, no import from host `src/`. | planned |
 | FU-CU-2 | TypeScript only; Node ≥ 22; ESM; strict TS. | planned |
 | FU-CU-3 | Browser SPA served by a local Fastify server bound to `127.0.0.1:<port>`. | planned |
 | FU-CU-4 | Three backend kinds: `agent-host-cc`, `openai`, `azure-openai`. | planned |
@@ -400,7 +400,7 @@ The implementer adds the following rows to the "Functional requirements" table. 
 **Verification commands (Claude executes from the repo root):**
 
 ```bash
-cd /Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui
+cd chat-ui
 npm install
 npm run typecheck
 npm run build
@@ -454,46 +454,46 @@ Title: **`## 14. Chat UI sub-application (chat-ui/)`**. Bullet outline as listed
 ## Master file inventory (all paths to be created)
 
 ```
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/package.json
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/tsconfig.base.json
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/tsconfig.json
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/tsconfig.server.json
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/vite.config.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/.gitignore
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/README.md
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test_scripts/.gitkeep
+chat-ui/package.json
+chat-ui/tsconfig.base.json
+chat-ui/tsconfig.json
+chat-ui/tsconfig.server.json
+chat-ui/vite.config.ts
+chat-ui/.gitignore
+chat-ui/README.md
+chat-ui/test_scripts/.gitkeep
 
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/index.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/config.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/errors.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/profileSchema.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/profileStore.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/profileRoutes.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/requestBuilder.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/server/chatRelay.ts
+chat-ui/server/index.ts
+chat-ui/server/config.ts
+chat-ui/server/errors.ts
+chat-ui/server/profileSchema.ts
+chat-ui/server/profileStore.ts
+chat-ui/server/profileRoutes.ts
+chat-ui/server/requestBuilder.ts
+chat-ui/server/chatRelay.ts
 
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/index.html
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/main.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/state.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/lib/api.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/lib/sseClient.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/components/App.tsx
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/components/ProfileSelector.tsx
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/components/ProfileEditor.tsx
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/components/Transcript.tsx
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/client/src/components/Composer.tsx
+chat-ui/client/index.html
+chat-ui/client/src/main.ts
+chat-ui/client/src/state.ts
+chat-ui/client/src/lib/api.ts
+chat-ui/client/src/lib/sseClient.ts
+chat-ui/client/src/components/App.tsx
+chat-ui/client/src/components/ProfileSelector.tsx
+chat-ui/client/src/components/ProfileEditor.tsx
+chat-ui/client/src/components/Transcript.tsx
+chat-ui/client/src/components/Composer.tsx
 
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/profileSchema.test.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/requestBuilder.test.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/unit/profileStore.test.ts
-/Users/giorgosmarinos/aiwork/agent-host-cc/chat-ui/test/integration/chatRelay.test.ts
+chat-ui/test/unit/profileSchema.test.ts
+chat-ui/test/unit/requestBuilder.test.ts
+chat-ui/test/unit/profileStore.test.ts
+chat-ui/test/integration/chatRelay.test.ts
 ```
 
 Modified docs (Phase 9):
 
 ```
-/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-design.md      # append section 14
-/Users/giorgosmarinos/aiwork/agent-host-cc/docs/design/project-functions.md   # append FU-CU-1 .. FU-CU-17
+docs/design/project-design.md      # append section 14
+docs/design/project-functions.md   # append FU-CU-1 .. FU-CU-17
 ```
 
 ---
