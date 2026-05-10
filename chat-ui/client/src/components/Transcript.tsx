@@ -2,29 +2,38 @@
  * Transcript — renders the `messages` signal as a list of role-tagged bubbles.
  *
  * Performance contract (Investigation rec 6.A): each message carries a NESTED
- * `content` signal. We render each bubble as its own child component that
- * subscribes to `msg.content.value`, so a streaming token append re-renders
- * only that one bubble — never the whole list.
+ * `content` signal. Each bubble is its own child component that subscribes to
+ * `msg.content.value`, so a streaming token append re-renders only that one
+ * bubble — never the whole list.
  *
- * Switch banners: messages with `kind === "switch-banner"` are rendered with
- * a system-styled row. They are NOT forwarded to the upstream by the composer
- * (Coder B's `sendMessage` action is responsible for that filter).
+ * Assistant messages are rendered through `marked` (markdown → HTML). User
+ * messages stay as plain text so a stray "*" doesn't accidentally render as
+ * bold. Switch banners (role: "system", content prefixed with the FU-10
+ * sentinel) render as compact inline pills.
+ *
+ * Streaming markdown can contain unclosed fences. We pass the text through
+ * `marked` as-is; `marked` is lenient and renders partial blocks gracefully.
  */
 
 import { h, Fragment } from "preact";
-import { useEffect, useRef } from "preact/hooks";
-import { messages, streamingMessageId, type Message } from "../state";
+import { useEffect, useMemo, useRef } from "preact/hooks";
+import { marked } from "marked";
+import {
+  activeProfileId,
+  messages,
+  profiles,
+  sendMessage,
+  streamingMessageId,
+  type Message,
+} from "../state";
 
-interface BubbleProps {
-  msg: Message;
-  isStreaming: boolean;
-}
+const STARTERS: { label: string; prompt: string }[] = [
+  { label: "Explain a concept", prompt: "Explain how SSE streaming works in plain language." },
+  { label: "Write code", prompt: "Write a TypeScript function that debounces another function." },
+  { label: "Plan a task", prompt: "Help me plan a refactor of a Fastify route handler." },
+  { label: "Summarise", prompt: "Summarise the key differences between WebSockets and Server-Sent Events." },
+];
 
-/**
- * Switch banners are stored as `role: "system"` messages whose content
- * starts with "— switched to profile" (per `state.ts` / FU-10). We detect
- * them by that prefix so they render with a distinct style.
- */
 function isSwitchBanner(msg: Message): boolean {
   return (
     msg.role === "system" &&
@@ -32,33 +41,60 @@ function isSwitchBanner(msg: Message): boolean {
   );
 }
 
+function renderMarkdown(text: string): string {
+  // `marked.parse` with sync option returns a string. Configure once per call
+  // (cheap). GFM gives us fenced code blocks, tables, autolinks.
+  return marked.parse(text, { async: false, gfm: true, breaks: true }) as string;
+}
+
+interface BubbleProps {
+  msg: Message;
+  isStreaming: boolean;
+}
+
 function Bubble({ msg, isStreaming }: BubbleProps) {
-  // Read the nested content signal here so this child re-renders on delta,
-  // but the parent <Transcript /> does not.
   const text = msg.content.value;
 
   if (isSwitchBanner(msg)) {
     return (
-      <div class="message message--system message--banner" role="status">
+      <div class="message message--banner" role="status">
         <span class="message__content">{text}</span>
       </div>
     );
   }
 
-  const roleClass =
-    msg.role === "user"
-      ? "message--user"
-      : msg.role === "assistant"
-        ? "message--assistant"
-        : "message--system";
-
-  return (
-    <div class={`message ${roleClass}`} data-message-id={msg.id}>
-      <div class="message__role">{msg.role}</div>
-      <div class="message__content">
-        {text}
-        {isStreaming && <span class="cursor" aria-hidden="true">|</span>}
+  if (msg.role === "user") {
+    return (
+      <div class="message message--user" data-message-id={msg.id}>
+        <div class="message__content">{text}</div>
       </div>
+    );
+  }
+
+  if (msg.role === "assistant") {
+    // Render markdown for assistant output. We append the streaming cursor
+    // AFTER the rendered HTML so unclosed blocks don't swallow it.
+    const html = renderMarkdown(text);
+    return (
+      <div class="message message--assistant" data-message-id={msg.id}>
+        <div class="message__role">Assistant</div>
+        <div
+          class="message__content"
+          // eslint-disable-next-line react/no-danger
+          dangerouslySetInnerHTML={{ __html: html }}
+        />
+        {isStreaming && (
+          <span class="cursor" aria-hidden="true" />
+        )}
+      </div>
+    );
+  }
+
+  // Other system messages (not switch banners) — render as plain text rows.
+  return (
+    <div class="message message--system" data-message-id={msg.id}>
+      <div class="message__role">System</div>
+      <div class="message__content">{text}</div>
     </div>
   );
 }
@@ -66,22 +102,14 @@ function Bubble({ msg, isStreaming }: BubbleProps) {
 export function Transcript() {
   const list = messages.value;
   const streamingId = streamingMessageId.value;
+  const activeId = activeProfileId.value;
   const scrollRef = useRef<HTMLDivElement | null>(null);
 
-  // Auto-scroll on list-length change. Per-token growth of the active bubble
-  // is handled by a second effect below that re-runs when the streaming
-  // bubble's content changes.
   useEffect(() => {
     const el = scrollRef.current;
-    if (el !== null) {
-      el.scrollTop = el.scrollHeight;
-    }
+    if (el !== null) el.scrollTop = el.scrollHeight;
   }, [list.length]);
 
-  // Track the streaming bubble's content length so we keep the view pinned to
-  // the bottom while tokens arrive. Reading `.value` inside the effect body
-  // creates a subscription, but we want a reactive trigger — so we read the
-  // current length explicitly into the dependency array.
   const streamingMsg =
     streamingId !== null ? list.find((m) => m.id === streamingId) : null;
   const streamingLen =
@@ -91,28 +119,61 @@ export function Transcript() {
 
   useEffect(() => {
     const el = scrollRef.current;
-    if (el !== null) {
-      el.scrollTop = el.scrollHeight;
-    }
+    if (el !== null) el.scrollTop = el.scrollHeight;
   }, [streamingLen]);
+
+  const activeName = useMemo(() => {
+    if (activeId === null) return null;
+    return profiles.value.find((p) => p.id === activeId)?.name ?? null;
+  }, [activeId, profiles.value]);
+
+  const isEmpty = list.length === 0;
 
   return (
     <div class="transcript" ref={scrollRef}>
-      {list.length === 0 ? (
-        <div class="transcript__empty">
-          Pick a profile and start chatting.
-        </div>
-      ) : (
-        <Fragment>
-          {list.map((msg) => (
-            <Bubble
-              key={msg.id}
-              msg={msg}
-              isStreaming={msg.id === streamingId}
-            />
-          ))}
-        </Fragment>
-      )}
+      <div class="transcript__inner">
+        {isEmpty ? (
+          <div class="transcript__empty">
+            <div>
+              <div class="transcript__empty-title">
+                {activeName !== null ? `Chat with ${activeName}` : "Set up a profile to start"}
+              </div>
+              <div class="transcript__empty-subtitle">
+                {activeId === null
+                  ? "Open “Manage profiles…” in the sidebar to add an OpenAI, Azure, or agent-host-cc backend."
+                  : "Pick a prompt below, or type your own."}
+              </div>
+            </div>
+            {activeId !== null && (
+              <div class="transcript__starters">
+                {STARTERS.map((s) => (
+                  <button
+                    key={s.label}
+                    type="button"
+                    class="transcript__starter"
+                    onClick={() => void sendMessage(s.prompt)}
+                  >
+                    <strong style={{ display: "block", marginBottom: 4, color: "var(--fg)" }}>
+                      {s.label}
+                    </strong>
+                    {s.prompt}
+                  </button>
+                ))}
+              </div>
+            )}
+          </div>
+        ) : (
+          <Fragment>
+            {list.map((msg) => (
+              <Bubble
+                key={msg.id}
+                msg={msg}
+                isStreaming={msg.id === streamingId}
+              />
+            ))}
+          </Fragment>
+        )}
+      </div>
     </div>
   );
 }

@@ -262,6 +262,11 @@ export async function sendMessage(text: string): Promise<void> {
     (m) => !(m.role === "assistant" && m.content === ""),
   );
 
+  // Step 4: AbortController for stop-button support. Stored at module scope
+  // so the Stop button (state.stopStreaming) can abort the in-flight stream.
+  const ac = new AbortController();
+  currentStreamAbort = ac;
+
   await streamChat(
     {
       messages: wireMessages,
@@ -271,18 +276,51 @@ export async function sendMessage(text: string): Promise<void> {
       onDelta: (delta) => appendDelta(assistantMsg.id, delta),
       onDone: () => {
         streamingMessageId.value = null;
+        currentStreamAbort = null;
       },
       onError: (err) => {
-        lastError.value = `${err.type}: ${err.message}`;
-        // Surface the error inline in the assistant bubble too, so
-        // users do not see a blank reply (FU-13).
-        if (assistantMsg.content.value.length === 0) {
-          assistantMsg.content.value = `[error: ${err.message}]`;
+        // User-initiated abort surfaces here as a generic "aborted" error
+        // from the underlying fetch; mark the bubble as cancelled rather
+        // than as an error.
+        if (ac.signal.aborted) {
+          if (assistantMsg.content.value.length === 0) {
+            assistantMsg.content.value = "[stopped]";
+          } else {
+            assistantMsg.content.value =
+              assistantMsg.content.value + "\n\n_[stopped]_";
+          }
+        } else {
+          lastError.value = `${err.type}: ${err.message}`;
+          // Surface the error inline in the assistant bubble too, so
+          // users do not see a blank reply (FU-13).
+          if (assistantMsg.content.value.length === 0) {
+            assistantMsg.content.value = `[error: ${err.message}]`;
+          }
         }
         streamingMessageId.value = null;
+        currentStreamAbort = null;
       },
+      signal: ac.signal,
     },
   );
+}
+
+// ---------------------------------------------------------------------------
+// Stop-button support
+// ---------------------------------------------------------------------------
+
+/**
+ * Abort the currently streaming assistant response, if any. The
+ * AbortController is created in `sendMessage` and stored at module scope
+ * so this entry point can cancel it from a UI button. Idempotent: calling
+ * stop when nothing is streaming is a no-op.
+ */
+let currentStreamAbort: AbortController | null = null;
+
+export function stopStreaming(): void {
+  if (currentStreamAbort != null && !currentStreamAbort.signal.aborted) {
+    currentStreamAbort.abort();
+  }
 }
 
 // ---------------------------------------------------------------------------

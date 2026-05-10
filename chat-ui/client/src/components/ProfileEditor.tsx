@@ -206,55 +206,83 @@ export function ProfileEditor({ onClose }: Props) {
   };
 
   return (
-    <div class="profile-editor" role="dialog" aria-label="Manage profiles">
-      <div class="profile-editor__header">
-        <h2 class="profile-editor__title">Profiles</h2>
-        <button
-          type="button"
-          class="profile-editor__close"
-          onClick={onClose}
-          aria-label="Close profile editor"
-        >
-          Close
-        </button>
-      </div>
+    <div
+      class="profile-editor"
+      role="dialog"
+      aria-modal="true"
+      aria-label="Manage profiles"
+      onClick={(e) => {
+        // Click on the backdrop (not the panel) closes the dialog.
+        if (e.target === e.currentTarget) onClose();
+      }}
+    >
+      <div class="profile-editor__panel">
+        <header class="profile-editor__header">
+          <h2 class="profile-editor__title">Manage profiles</h2>
+          <button
+            type="button"
+            class="profile-editor__close"
+            onClick={onClose}
+            aria-label="Close profile editor"
+            title="Close"
+          >
+            ×
+          </button>
+        </header>
 
-      <div class="profile-editor__body">
-        <section class="profile-editor__list">
-          <div class="profile-editor__list-header">
-            <h3>Existing</h3>
-            <button type="button" onClick={startCreate}>
-              + New profile
-            </button>
-          </div>
-          {list.length === 0 && (
-            <p class="profile-editor__empty">
-              No profiles yet. Use the form to create one.
-            </p>
-          )}
-          <ul>
-            {list.map((p) => (
-              <li key={p.id} class="profile-editor__item">
-                <span class="profile-editor__item-name">{p.name}</span>
-                <span class="profile-editor__item-kind">[{p.backendKind}]</span>
-                <button type="button" onClick={() => startEdit(p.id)}>
-                  Edit
-                </button>
-                <button
-                  type="button"
-                  onClick={() => handleDelete(p.id, p.name)}
-                >
-                  Delete
-                </button>
-              </li>
-            ))}
-          </ul>
-        </section>
+        <div class="profile-editor__body">
+          <aside class="profile-editor__list" aria-label="Existing profiles">
+            <div class="profile-editor__list-header">
+              <span>Existing</span>
+              <button type="button" onClick={startCreate}>
+                + New
+              </button>
+            </div>
 
-        <section class="profile-form">
-          <h3>{editingId !== null ? "Edit profile" : "New profile"}</h3>
+            {list.length === 0 ? (
+              <p class="profile-editor__empty">No profiles yet.</p>
+            ) : (
+              <ul class="profile-editor__items">
+                {list.map((p) => {
+                  const isEditing = editingId === p.id;
+                  return (
+                    <li
+                      key={p.id}
+                      class={
+                        isEditing
+                          ? "profile-editor__item is-editing"
+                          : "profile-editor__item"
+                      }
+                    >
+                      <div class="profile-editor__item-main">
+                        <span class="profile-editor__item-name">{p.name}</span>
+                        <span class="profile-editor__item-kind">
+                          {p.backendKind}
+                        </span>
+                      </div>
+                      <div class="profile-editor__item-actions">
+                        <button type="button" onClick={() => startEdit(p.id)}>
+                          Edit
+                        </button>
+                        <button
+                          type="button"
+                          onClick={() => handleDelete(p.id, p.name)}
+                        >
+                          Delete
+                        </button>
+                      </div>
+                    </li>
+                  );
+                })}
+              </ul>
+            )}
+          </aside>
 
-          <form onSubmit={handleSubmit}>
+          <form class="profile-form" onSubmit={handleSubmit}>
+            <h3 class="profile-form__title">
+              {editingId !== null ? "Edit profile" : "New profile"}
+            </h3>
+
             <div class="field">
               <label for="pf-name">Name</label>
               <input
@@ -268,11 +296,13 @@ export function ProfileEditor({ onClose }: Props) {
               />
             </div>
 
-            <fieldset class="field field--kind">
-              <legend>Backend kind</legend>
-              {(["agent-host-cc", "openai", "azure-openai"] as BackendKind[]).map(
-                (k) => (
-                  <label key={k} class="field__radio">
+            <div class="field field--kind" role="group" aria-label="Backend kind">
+              <div class="field__group-label">Backend kind</div>
+              <div class="field__radio">
+                {(
+                  ["agent-host-cc", "openai", "azure-openai"] as BackendKind[]
+                ).map((k) => (
+                  <label key={k}>
                     <input
                       type="radio"
                       name="backendKind"
@@ -283,14 +313,14 @@ export function ProfileEditor({ onClose }: Props) {
                     />
                     <span>{k}</span>
                   </label>
-                ),
-              )}
+                ))}
+              </div>
               {editingId !== null && (
                 <p class="field__hint">
-                  Backend kind cannot be changed after a profile is created.
+                  Backend kind cannot be changed after creation.
                 </p>
               )}
-            </fieldset>
+            </div>
 
             {form.backendKind === "agent-host-cc" && (
               <div class="profile-form__branch">
@@ -559,7 +589,7 @@ export function ProfileEditor({ onClose }: Props) {
               )}
             </div>
           </form>
-        </section>
+        </div>
       </div>
     </div>
   );
