@@ -1,0 +1,15 @@
+{
+  "extends": "./tsconfig.base.json",
+  "compilerOptions": {
+    "lib": ["ES2022"],
+    "types": ["node"],
+    "moduleResolution": "Node16",
+    "module": "Node16",
+    "outDir": "./dist/server",
+    "rootDir": "./server",
+    "declaration": false,
+    "sourceMap": true
+  },
+  "include": ["server/**/*.ts"],
+  "exclude": ["node_modules", "dist", "client", "test"]
+}
