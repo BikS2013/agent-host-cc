@@ -191,6 +191,52 @@ See `docs/design/project-design.md` §14.6 for the complete contract.
 
 ---
 
+## Containerization
+
+A multi-stage `Dockerfile` and `.dockerignore` live next to this README so the chat-ui can be built and run as a standalone container. Helper scripts at the repo root drive the build and run, and `docker-compose.yml` mirrors the run script declaratively.
+
+**Prerequisites.** Docker 23+ with BuildKit enabled (the build uses `--mount=type=cache,target=/root/.npm`). On Linux, `--network host` support is required for the smoke test (see the binding caveat below).
+
+**Build, run, smoke-test:**
+
+```bash
+# from the repo root
+./scripts/docker-build-ui.sh                  # builds agent-host-cc-ui:latest (+ :<short-sha>)
+USE_HOST_NETWORK=1 ./scripts/docker-run-ui.sh &   # Linux: the only mode that's reachable from the host
+sleep 3
+curl -fsS http://127.0.0.1:5174/healthz       # → {"ok":true}
+```
+
+Or with compose:
+
+```bash
+docker compose up --build chat-ui
+```
+
+**Env / port overrides:**
+
+| Variable | Script(s) | Default | Purpose |
+|---|---|---|---|
+| `IMAGE_NAME` | build, run | `agent-host-cc-ui` | Image repository name. |
+| `TAG` | build, run | `latest` | Image tag. |
+| `HOST_PORT` | run, compose | `5174` | Host-side port. |
+| `CONTAINER_PORT` | run | `5174` | Container-side port. Also set as `CHAT_UI_PORT` inside the container. |
+| `CHAT_UI_PORT` | compose | `5174` | Container-side port for compose. |
+| `ENV_FILE` | run | _(none)_ | Path to a `--env-file` for additional env injection. |
+| `USE_HOST_NETWORK` | run | _(unset)_ | When truthy, swap port-mapping for `--network host` (Linux). |
+| `EXTRA_ARGS` / `BUILD_ARGS` | run / build | _(none)_ | Verbatim pass-through to `docker run` / `docker build`. |
+
+**Image base & expected size.** Multi-stage build on `node:22-bookworm-slim`. The runtime stage carries only production `node_modules`, the compiled `dist/`, and `package.json`. Expected final size is ~150–250 MB.
+
+**Bind-address caveat (read before smoke-testing).** The Fastify server binds to `127.0.0.1` inside the container by design — `server/config.ts` hardcodes the host because this is a dev-time tool that stores plaintext API keys on disk. A bridged `docker run -p HOST:CONTAINER ...` mapping therefore cannot reach it. The reachable modes are:
+
+- **Linux:** `USE_HOST_NETWORK=1 ./scripts/docker-run-ui.sh` (uses `--network host`), or uncomment `network_mode: host` in `docker-compose.yml`.
+- **Docker Desktop (macOS/Windows):** `--network host` does not bridge to the host loopback the same way, so the container is not reachable through any built-in flag. The pragmatic options are (a) run chat-ui directly via `npm run start` on the host instead, or (b) add an in-container TCP forwarder (e.g. `socat TCP-LISTEN:5174,fork,reuseaddr TCP:127.0.0.1:5174`) and bind to it — neither is wired into these scripts.
+
+The Fastify `HEALTHCHECK` baked into the image polls `/healthz` every 30 s using Node's built-in `fetch`.
+
+---
+
 ## Cross-references
 
 - Plan: `docs/design/plan-004-chat-ui.md`

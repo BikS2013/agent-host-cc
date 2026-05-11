@@ -102,6 +102,38 @@ HOST_PORT=9000 ./scripts/run-apple-container.sh
 WITH_VOLUME=1 ./scripts/delete-apple-container.sh
 ```
 
+## Chat-UI containerization
+
+The chat-ui sub-app ships its own multi-stage Dockerfile so it can be built and shipped as a standalone container, independent of the host service's image.
+
+```bash
+# Build the image (tags: agent-host-cc-ui:latest + agent-host-cc-ui:<short-sha>).
+./scripts/docker-build-ui.sh
+
+# Run it.
+./scripts/docker-run-ui.sh                          # publishes 5174 → 5174
+HOST_PORT=8080 ./scripts/docker-run-ui.sh           # remap host port
+ENV_FILE=./chat-ui.env ./scripts/docker-run-ui.sh   # inject env vars
+
+# Or via compose (mirrors the run script).
+docker compose up --build chat-ui
+```
+
+The build is a two-stage `node:22-bookworm-slim` (builder runs `npm ci` + `npm run build`, then prunes dev deps; runtime copies production node_modules, the compiled `dist/`, drops to the non-root `node` user, and runs `node dist/server/index.js`). Expected image size is ~150–250 MB.
+
+**Smoke-test (on a Docker-capable host):**
+
+```bash
+./scripts/docker-build-ui.sh
+USE_HOST_NETWORK=1 ./scripts/docker-run-ui.sh &      # Linux only — see note below
+sleep 3
+curl -fsS http://127.0.0.1:5174/healthz              # → {"ok":true}
+```
+
+**Important — bind address constraint.** The chat-ui Fastify server binds to `127.0.0.1` by design (`chat-ui/server/config.ts` hardcodes the host, since the app stores plaintext API keys on disk and is a dev-time tool). A standard `-p HOST:CONTAINER` mapping therefore cannot reach it through the default bridge network. To smoke-test from a host, use `--network host` on Linux (`USE_HOST_NETWORK=1 ./scripts/docker-run-ui.sh`, or uncomment `network_mode: host` in `docker-compose.yml`). On Docker Desktop (macOS/Windows), the bridge limitation also applies and the recommended path is to either run the chat-ui directly via `npm run start` outside Docker, or run the container with an in-container TCP forwarder (out of scope for these scripts).
+
+Configurable env vars (see `chat-ui/README.md` § Configuration for the full matrix): `CHAT_UI_PORT` (default `5174` in the container image; `5173` when run outside it), `CHAT_UI_PROFILES_PATH`, `CHAT_UI_SERVE_STATIC`, `LOG_LEVEL`. The container's `HEALTHCHECK` polls `/healthz` every 30 s.
+
 ## Documentation
 
 - **Architecture, components, request flow** — `docs/design/project-design.md`.
