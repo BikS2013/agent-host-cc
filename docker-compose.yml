@@ -1,0 +1,37 @@
+# docker-compose.yml — chat-ui only.
+#
+# This compose file mirrors scripts/docker-run-ui.sh but as a declarative
+# manifest, so a developer can spin the chat-ui container up with a single
+# `docker compose up chat-ui` on a Docker-capable host.
+#
+# NOTE on networking: the chat-ui Fastify server binds to 127.0.0.1 inside
+# the container (see chat-ui/server/config.ts — the bind address is
+# hardcoded for security). A bridged `-p` mapping therefore CANNOT reach
+# it. To smoke-test the container from the host, prefer `network_mode:
+# host` on Linux (uncomment below) OR see chat-ui/README.md "Container-
+# ization" for the in-container TCP forwarder workaround.
+
+services:
+  chat-ui:
+    container_name: agent-host-cc-ui
+    image: agent-host-cc-ui:latest
+    build:
+      context: ./chat-ui
+      dockerfile: Dockerfile
+    restart: unless-stopped
+    environment:
+      CHAT_UI_PORT: "${CHAT_UI_PORT:-5174}"
+      LOG_LEVEL: "${LOG_LEVEL:-info}"
+    ports:
+      - "${HOST_PORT:-5174}:${CHAT_UI_PORT:-5174}"
+    # network_mode: host        # uncomment on Linux to make the 127.0.0.1
+                                 # bind reachable from the host; comment out
+                                 # the `ports:` block above when enabling.
+    healthcheck:
+      test:
+        - CMD-SHELL
+        - node -e "fetch('http://127.0.0.1:'+(process.env.CHAT_UI_PORT||'5174')+'/healthz').then(r=>{if(!r.ok)process.exit(1)}).catch(()=>process.exit(1))"
+      interval: 30s
+      timeout: 5s
+      start_period: 10s
+      retries: 3
